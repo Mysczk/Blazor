@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  blazor-app:
+    image: blazor-app:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
