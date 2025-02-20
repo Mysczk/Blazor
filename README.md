@@ -1,3 +1,3 @@
 **Blazor**
 
-Projekt pro předmět GUI zaměřený na Blazor
+Projekt pro předmět GUI zaměřený .NET Blazor
