@@ -45,4 +45,4 @@ publish/
 # Docker
 **/docker-compose.override.yml
 **/.dockerignore
-**/Dockerfile
+
