@@ -1,0 +1,44 @@
+<div>
+    <input type="text" @bind="newTaskText" placeholder="Enter task..." @bind:event="oninput" @onkeypress="KeyPress"/>
+    <Button_2 OnClick="AddTask" Type="primary">➕ Add</Button_2>
+
+    <ul>
+        @foreach (var task in tasks)
+        {
+            <li>
+                <TaskItem Task="task" OnRemove="RemoveTask" />
+            </li>
+        }
+    </ul>
+</div>
+
+@code {
+    private List<TaskModel> tasks = new()
+    {
+        new TaskModel { Text = "Dokončit Blazor projekt", IsDone = false },
+        new TaskModel { Text = "Udělat prezentaci", IsDone = true },
+        new TaskModel { Text = "Udělat úlohy pro cvičení", IsDone = false }
+    };
+
+    private string newTaskText = string.Empty;
+
+    private void AddTask()
+    {
+        if (!string.IsNullOrWhiteSpace(newTaskText))
+        {
+            tasks.Add(new TaskModel { Text = newTaskText });
+            newTaskText = string.Empty;
+        }
+    }
+    void KeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && !string.IsNullOrEmpty(newTaskText))
+            AddTask();
+    }
+
+    private void RemoveTask(TaskModel task)
+    {
+        tasks.Remove(task);
+    }
+}
+
