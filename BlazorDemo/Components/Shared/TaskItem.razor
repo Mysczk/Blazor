@@ -1,0 +1,17 @@
+<div class="task-item">
+    <input type="checkbox" @bind="@Task.IsDone" />
+    <span class="@GetTextClass()">@Task.Text</span>
+    <Button_2 OnClick="OnDelete" Type="danger">❌</Button_2>
+</div>
+
+@code {
+    [Parameter] public TaskModel Task { get; set; } = new TaskModel();
+    [Parameter] public EventCallback<TaskModel> OnRemove { get; set; }
+
+    private async Task OnDelete()
+    {
+        await OnRemove.InvokeAsync(Task);
+    }
+
+    private string GetTextClass() => Task.IsDone ? "task-done" : "";
+}
