@@ -1,26 +1,41 @@
-
 namespace BlazorDemo.Models
 {
     public class TaskService
     {
-        private List<TaskModel> tasks = new List<TaskModel>();
+        private List<TaskListModel> taskLists = new List<TaskListModel>();
+        public TaskListModel DefaultTaskList { get; private set; }
 
-        // Metoda pro získání všech úkolů
-        public List<TaskModel> GetTasks()
+        public TaskService()
         {
-            return tasks;
+            // Initialize the default task list
+            DefaultTaskList = new TaskListModel { Name = "ToDo" };
+            taskLists.Add(DefaultTaskList);
         }
 
-        // Metoda pro přidání nového úkolu
-        public void AddTask(string text, TaskType type)
+        // Method to get all task lists
+        public List<TaskListModel> GetTaskLists()
         {
-            tasks.Add(new TaskModel { Text = text, Type = type });
+            return taskLists;
         }
 
-        // Metoda pro přesunutí úkolu do jiného stavu
-        public void MoveTask(TaskModel task, TaskType newType)
+        // Method to add a new task list
+        public void AddTaskList(string name)
         {
-            task.Type = newType;
+            taskLists.Add(new TaskListModel { Name = name });
+        }
+
+        // Method to add a new task to a specific task list
+        public void AddTask(string text, TaskListModel taskList)
+        {
+            taskList.Tasks.Add(new TaskModel { Text = text, TaskList = taskList });
+        }
+
+        // Method to move a task to a different task list
+        public void MoveTask(TaskModel task, TaskListModel newTaskList)
+        {
+            task.TaskList.Tasks.Remove(task);
+            task.TaskList = newTaskList;
+            newTaskList.Tasks.Add(task);
         }
     }
 }

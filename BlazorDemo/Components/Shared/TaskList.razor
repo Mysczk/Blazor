@@ -1,26 +1,24 @@
-@foreach (var task in Tasks.Where(t => t.Type == Type))
+@foreach (var task in taskListModel.Tasks)
 {
-    <TaskItem Task="task" OnMoveTask="HandleMoveTask" OnRemove="RemoveTask" />
+    <TaskItem Task="task" TaskLists="TaskLists" OnMoveTask="HandleMoveTask" OnRemove="RemoveTask" />
 }
 
 @code {
     [Parameter]
-    public TaskType Type { get; set; }
-
+    public TaskListModel taskListModel { get; set; } = new TaskListModel();
     [Parameter]
-    public List<TaskModel> Tasks { get; set; } = new List<TaskModel>();
-
+    public List<TaskListModel> TaskLists { get; set; } = new List<TaskListModel>();
+    
     [Parameter]
-    public EventCallback<(TaskModel task, TaskType newType)> OnMoveTask { get; set; }
+    public EventCallback<(TaskModel task, TaskListModel newTaskList)> OnMoveTask { get; set; }
 
     private void RemoveTask(TaskModel task)
     {
-        Tasks.Remove(task);
+        taskListModel.Tasks.Remove(task);
     }
 
-    private async Task HandleMoveTask((TaskModel task, TaskType newType) moveTask)
+    private async Task HandleMoveTask((TaskModel task, TaskListModel newTaskList) moveTask)
     {
-        // Zavoláme rodičovskou komponentu a předáme jí informaci o přesunu
         await OnMoveTask.InvokeAsync(moveTask);
     }
 }

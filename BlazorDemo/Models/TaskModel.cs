@@ -1,6 +1,7 @@
 namespace BlazorDemo.Models;
+
 public class TaskModel
 {
-    public string Text { get; set; } = string.Empty; // Název úkolu
-    public TaskType Type { get; set; } = TaskType.ToDo; // Typ úkolu (stav)
+    public string Text { get; set; } = string.Empty; // Task name
+    public TaskListModel TaskList { get; set; } // Reference to the task list it belongs to
 }

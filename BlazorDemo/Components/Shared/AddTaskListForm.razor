@@ -1,0 +1,28 @@
+<div class="add-task-list-form">
+    <input @bind="newTaskListName" placeholder="Enter task list name" @onkeypress="HandleKeyPress" />
+    <Button_2 OnClick="AddTaskList" Type="secondary">Add Task List</Button_2>
+</div>
+
+@code {
+    [Parameter]
+    public EventCallback<string> OnTaskListAdded { get; set; }
+
+    private string newTaskListName = string.Empty;
+
+    private async Task AddTaskList()
+    {
+        if (!string.IsNullOrWhiteSpace(newTaskListName))
+        {
+            await OnTaskListAdded.InvokeAsync(newTaskListName);
+            newTaskListName = string.Empty;
+        }
+    }
+
+    private async Task HandleKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await AddTaskList();
+        }
+    }
+}

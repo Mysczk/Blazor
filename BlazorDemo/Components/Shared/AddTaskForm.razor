@@ -1,37 +1,48 @@
 <div class="add-task-form">
-    <input @bind="newTaskText" placeholder="Zadejte název úkolu" @onkeypress="HandleKeyPress" />
-    <select @bind="selectedType">
-        <option value="ToDo">Todo</option>
-        <option value="InProgress">In Progress</option>
-        <option value="Done">Done</option>
+    <input @bind="newTaskText" placeholder="Enter task name" @onkeypress="HandleKeyPress" />
+    <select @bind="selectedTaskListName">
+        @foreach (var taskList in TaskLists)
+        {
+            <option value="@taskList.Name">@taskList.Name</option>
+        }
     </select>
-    <Button_2 OnClick="AddTask" Type="secondary">Přidat úkol</Button_2>
+    <Button_2 OnClick="AddTask" Type="secondary">Add Task</Button_2>
 </div>
 
 @code {
     [Parameter]
     public EventCallback<TaskModel> OnTaskAdded { get; set; }
+    [Parameter]
+    public List<TaskListModel> TaskLists { get; set; } = new List<TaskListModel>();
 
-    private string newTaskText = string.Empty; // Text nového úkolu
-    private TaskType selectedType = TaskType.ToDo; // Výchozí typ úkolu
+    private string newTaskText = string.Empty;
+    private string selectedTaskListName = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        if (TaskLists.Any())
+        {
+            selectedTaskListName = TaskLists.First().Name;
+        }
+    }
 
     private async Task AddTask()
     {
-        if (!string.IsNullOrWhiteSpace(newTaskText))
+        if (!string.IsNullOrWhiteSpace(newTaskText) && !string.IsNullOrWhiteSpace(selectedTaskListName))
         {
-            // Vytvoříme nový úkol
-            var newTask = new TaskModel
+            var selectedTaskList = TaskLists.FirstOrDefault(tl => tl.Name == selectedTaskListName);
+            if (selectedTaskList != null)
             {
-                Text = newTaskText,
-                Type = selectedType
-            };
+                var newTask = new TaskModel
+                {
+                    Text = newTaskText,
+                    TaskList = selectedTaskList
+                };
 
-            // Zavoláme rodičovskou komponentu a předáme jí nový úkol
-            await OnTaskAdded.InvokeAsync(newTask);
-
-            // Vyčistíme formulář
-            newTaskText = string.Empty;
-            selectedType = TaskType.ToDo;
+                await OnTaskAdded.InvokeAsync(newTask);
+                newTaskText = string.Empty;
+                selectedTaskListName = TaskLists.First().Name;
+            }
         }
     }
 

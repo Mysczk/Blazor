@@ -1,0 +1,40 @@
+﻿@page "/todo"
+@inject TaskService TaskService
+
+<PageTitle>Task Board</PageTitle>
+
+<h3>Task Board</h3>
+
+<!-- Form to add a new task list -->
+<AddTaskListForm OnTaskListAdded="HandleTaskListAdded" />
+
+<!-- Form to add a new task -->
+<AddTaskForm OnTaskAdded="HandleTaskAdded" TaskLists="TaskService.GetTaskLists()" />
+
+<!-- Kanban board -->
+<div class="kanban-board">
+    @foreach (var taskList in TaskService.GetTaskLists())
+    {
+        <div class="kanban-column">
+            <h4>@taskList.Name</h4>
+            <TaskList taskListModel="taskList" TaskLists="TaskService.GetTaskLists()" OnMoveTask="HandleMoveTask" />
+        </div>
+    }
+</div>
+
+@code {
+    private void HandleTaskListAdded(string newTaskListName)
+    {
+        TaskService.AddTaskList(newTaskListName);
+    }
+
+    private void HandleTaskAdded(TaskModel newTask)
+    {
+        TaskService.AddTask(newTask.Text, newTask.TaskList);
+    }
+
+    private void HandleMoveTask((TaskModel task, TaskListModel newTaskList) moveTask)
+    {
+        TaskService.MoveTask(moveTask.task, moveTask.newTaskList);
+    }
+}
