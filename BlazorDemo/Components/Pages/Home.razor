@@ -4,4 +4,10 @@
 
 <h1>Hello, world!</h1>
 
-Welcome to your new app.
+public TaskService()
+{
+    // Přidání testovacích úkolů
+    tasks.Add(new TaskItem { Text = "Naučit se Blazor", Type = TaskType.Todo });
+    tasks.Add(new TaskItem { Text = "Vytvořit kanban board", Type = TaskType.InProgress });
+    tasks.Add(new TaskItem { Text = "Pochopit dependency injection", Type = TaskType.Done });
+}

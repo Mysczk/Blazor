@@ -1,0 +1,37 @@
+﻿@page "/kanban"
+@inject TaskService TaskService
+
+<h3>Kanban Board</h3>
+
+<!-- Formulář pro přidání nového úkolu -->
+<AddTaskForm OnTaskAdded="HandleTaskAdded" />
+
+<!-- Kanban board -->
+<div class="kanban-board">
+    <div class="kanban-column">
+        <h4>Todo</h4>
+        <TaskList Type="TaskType.ToDo" Tasks="TaskService.GetTasks()" OnMoveTask="HandleMoveTask" />
+    </div>
+    <div class="kanban-column">
+        <h4>In Progress</h4>
+        <TaskList Type="TaskType.InProgress" Tasks="TaskService.GetTasks()" OnMoveTask="HandleMoveTask" />
+    </div>
+    <div class="kanban-column">
+        <h4>Done</h4>
+        <TaskList Type="TaskType.Done" Tasks="TaskService.GetTasks()" OnMoveTask="HandleMoveTask" />
+    </div>
+</div>
+
+@code {
+    private void HandleTaskAdded(TaskModel newTask)
+    {
+        // Přidáme nový úkol do seznamu
+        TaskService.AddTask(newTask.Text, newTask.Type);
+    }
+
+    private void HandleMoveTask((TaskModel task, TaskType newType) moveTask)
+    {
+        // Přesuneme úkol do nového stavu
+        TaskService.MoveTask(moveTask.task, moveTask.newType);
+    }
+}

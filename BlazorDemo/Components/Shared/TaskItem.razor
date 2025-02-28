@@ -1,17 +1,35 @@
 <div class="task-item">
-    <input type="checkbox" @bind="@Task.IsDone" />
-    <span class="@GetTextClass()">@Task.Text</span>
+    <span>@Task.Text</span>
+    <select @bind="selectedType" @bind:event="onchange">
+        <option value="ToDo">Todo</option>
+        <option value="InProgress">In Progress</option>
+        <option value="Done">Done</option>
+    </select>
+    <Button_2 OnClick="HandleStatusChange" Type="primary">Move</Button_2>
     <Button_2 OnClick="OnDelete" Type="danger">❌</Button_2>
 </div>
 
 @code {
     [Parameter] public TaskModel Task { get; set; } = new TaskModel();
+    [Parameter] public EventCallback<(TaskModel task, TaskType newType)> OnMoveTask { get; set; }
     [Parameter] public EventCallback<TaskModel> OnRemove { get; set; }
+
+    private TaskType selectedType;
+
+    protected override void OnParametersSet()
+    {
+        // Nastavíme aktuální stav úkolu do selectu
+        selectedType = Task.Type;
+    }
+
+    private async Task HandleStatusChange()
+    {
+        // Zavoláme rodičovskou komponentu a předáme jí nový stav úkolu
+        await OnMoveTask.InvokeAsync((Task, selectedType));
+    }
 
     private async Task OnDelete()
     {
         await OnRemove.InvokeAsync(Task);
     }
-
-    private string GetTextClass() => Task.IsDone ? "task-done" : "";
 }

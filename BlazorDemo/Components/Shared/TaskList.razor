@@ -1,44 +1,26 @@
-<div>
-    <input type="text" @bind="newTaskText" placeholder="Enter task..." @bind:event="oninput" @onkeypress="KeyPress"/>
-    <Button_2 OnClick="AddTask" Type="primary">➕ Add</Button_2>
-
-    <ul>
-        @foreach (var task in tasks)
-        {
-            <li>
-                <TaskItem Task="task" OnRemove="RemoveTask" />
-            </li>
-        }
-    </ul>
-</div>
+@foreach (var task in Tasks.Where(t => t.Type == Type))
+{
+    <TaskItem Task="task" OnMoveTask="HandleMoveTask" OnRemove="RemoveTask" />
+}
 
 @code {
-    private List<TaskModel> tasks = new()
-    {
-        new TaskModel { Text = "Dokončit Blazor projekt", IsDone = false },
-        new TaskModel { Text = "Udělat prezentaci", IsDone = true },
-        new TaskModel { Text = "Udělat úlohy pro cvičení", IsDone = false }
-    };
+    [Parameter]
+    public TaskType Type { get; set; }
 
-    private string newTaskText = string.Empty;
+    [Parameter]
+    public List<TaskModel> Tasks { get; set; } = new List<TaskModel>();
 
-    private void AddTask()
-    {
-        if (!string.IsNullOrWhiteSpace(newTaskText))
-        {
-            tasks.Add(new TaskModel { Text = newTaskText });
-            newTaskText = string.Empty;
-        }
-    }
-    void KeyPress(KeyboardEventArgs e)
-    {
-        if (e.Key == "Enter" && !string.IsNullOrEmpty(newTaskText))
-            AddTask();
-    }
+    [Parameter]
+    public EventCallback<(TaskModel task, TaskType newType)> OnMoveTask { get; set; }
 
     private void RemoveTask(TaskModel task)
     {
-        tasks.Remove(task);
+        Tasks.Remove(task);
+    }
+
+    private async Task HandleMoveTask((TaskModel task, TaskType newType) moveTask)
+    {
+        // Zavoláme rodičovskou komponentu a předáme jí informaci o přesunu
+        await OnMoveTask.InvokeAsync(moveTask);
     }
 }
-

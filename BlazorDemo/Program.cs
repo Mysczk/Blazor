@@ -1,4 +1,5 @@
 using BlazorDemo.Components;
+using BlazorDemo.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,7 +9,9 @@ builder.Services.AddBlazorBootstrap();
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
-    
+
+// Registrace služby jako singleton
+builder.Services.AddSingleton<TaskService>();
 
 var app = builder.Build();
 
