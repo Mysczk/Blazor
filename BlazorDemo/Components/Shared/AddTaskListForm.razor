@@ -1,5 +1,5 @@
 <div class="add-task-list-form">
-    <input @bind="newTaskListName" placeholder="Enter task list name" @onkeypress="HandleKeyPress" />
+    <input @bind="newTaskListName" placeholder="Enter task list name" @bind:event="oninput" @onkeypress="HandleKeyPress" />
     <Button_2 OnClick="AddTaskList" Type="secondary">Add Task List</Button_2>
 </div>
 

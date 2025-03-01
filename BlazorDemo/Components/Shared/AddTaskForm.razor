@@ -1,5 +1,5 @@
 <div class="add-task-form">
-    <input @bind="newTaskText" placeholder="Enter task name" @onkeypress="HandleKeyPress" />
+    <input @bind="newTaskText" placeholder="Enter task name"  @bind:event="oninput" @onkeypress="HandleKeyPress" />
     <select @bind="selectedTaskListName">
         @foreach (var taskList in TaskLists)
         {
