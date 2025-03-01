@@ -1,0 +1,57 @@
+﻿@rendermode InteractiveServer
+
+
+<div id="carouselExampleControls" class="carousel slide" data-bs-ride="carousel" style="width: @SliderWidth; height: @SliderHeight">
+    <div class="carousel-inner">
+        @for (int i = 0; i < DisplayImages.Count; i++)
+        {
+            <div class="carousel-item @(i == 0 ? "active" : "")">
+                <img class="d-block w-100" src="@DisplayImages[i]" alt="Slide @(i + 1)">
+            </div>
+        }
+    </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Previous</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Next</span>
+    </button>
+</div>
+
+
+@code {
+    // TODO: Fix size of the slider
+    [Parameter]
+    public int NumberOfSlides { get; set; } = 5;
+
+    [Parameter]
+    public string ImageFormat { get; set; } = "png";
+
+    [Parameter]
+    public string SliderWidth { get; set; } = "100%";
+
+    [Parameter]
+    public string SliderHeight { get; set; } = "400px";
+
+    private List<string> Images { get; set; } = new List<string>();
+    private List<string> DisplayImages => Images.Take(Math.Min(NumberOfSlides, Images.Count)).ToList();
+
+    protected override void OnInitialized()
+    {
+        LoadImages();
+    }
+
+    private void LoadImages()
+    {
+        var imageFolder = Path.Combine("wwwroot", "images", "slider");
+        var imageFiles = Directory.GetFiles(imageFolder, $"*.{ImageFormat}");
+
+        foreach (var file in imageFiles)
+        {
+            var relativePath = Path.Combine("images", "slider", Path.GetFileName(file)).Replace("\\", "/");
+            Images.Add(relativePath);
+        }
+    }
+}
