@@ -1,7 +1,9 @@
+
 @foreach (var task in taskListModel.Tasks)
 {
     <TaskItem Task="task" TaskLists="TaskLists" OnMoveTask="HandleMoveTask" OnRemove="RemoveTask" />
 }
+
 
 @code {
     [Parameter]
@@ -21,4 +23,5 @@
     {
         await OnMoveTask.InvokeAsync(moveTask);
     }
+
 }

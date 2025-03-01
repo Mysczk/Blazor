@@ -9,15 +9,18 @@
 <AddTaskListForm OnTaskListAdded="HandleTaskListAdded" />
 
 <!-- Form to add a new task -->
-<AddTaskForm OnTaskAdded="HandleTaskAdded" TaskLists="TaskService.GetTaskLists()" />
+<AddTaskForm OnTaskAdded="HandleTaskAdded" TaskLists=@GetTaskLists() />
 
 <!-- Kanban board -->
 <div class="kanban-board">
-    @foreach (var taskList in TaskService.GetTaskLists())
+    @foreach (var taskList in GetTaskLists())
     {
         <div class="kanban-column">
-            <h4>@taskList.Name</h4>
-            <TaskList taskListModel="taskList" TaskLists="TaskService.GetTaskLists()" OnMoveTask="HandleMoveTask" />
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h4>@taskList.Name</h4>
+                <Button_2 OnClick="() => RemoveTaskList(taskList)" Type="danger">❌</Button_2>
+            </div>
+            <TaskList taskListModel="taskList" TaskLists=@GetTaskLists() OnMoveTask="HandleMoveTask"/>
         </div>
     }
 </div>
@@ -28,13 +31,26 @@
         TaskService.AddTaskList(newTaskListName);
     }
 
+    private List<TaskListModel> GetTaskLists()
+    {
+        return TaskService.GetTaskLists();
+    }
+
+
+
     private void HandleTaskAdded(TaskModel newTask)
     {
+        Console.WriteLine("Tady jsem v metodě HandleTaskAdded()");
         TaskService.AddTask(newTask.Text, newTask.TaskList);
     }
 
     private void HandleMoveTask((TaskModel task, TaskListModel newTaskList) moveTask)
     {
         TaskService.MoveTask(moveTask.task, moveTask.newTaskList);
+    }
+
+    private void RemoveTaskList(TaskListModel taskList)
+    {
+        TaskService.RemoveTaskList(taskList);
     }
 }

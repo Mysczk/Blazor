@@ -1,17 +1,27 @@
 <div class="add-task-form">
     <input @bind="newTaskText" placeholder="Enter task name"  @bind:event="oninput" @onkeypress="HandleKeyPress" />
+
     <select @bind="selectedTaskListName">
-        @foreach (var taskList in TaskLists)
+        @if (TaskLists.Any())
         {
-            <option value="@taskList.Name">@taskList.Name</option>
+            @foreach (var taskList in TaskLists)
+            {
+                <option value="@taskList.Name">@taskList.Name</option>
+            }
+        }
+        else
+        {
+            <option disabled>No task lists available</option>
         }
     </select>
-    <Button_2 OnClick="AddTask" Type="secondary">Add Task</Button_2>
+
+    <Button_2 OnClick="AddTask" Type="secondary" disabled="@(TaskLists.Count == 0)">Add Task</Button_2>
 </div>
 
 @code {
     [Parameter]
     public EventCallback<TaskModel> OnTaskAdded { get; set; }
+    
     [Parameter]
     public List<TaskListModel> TaskLists { get; set; } = new List<TaskListModel>();
 
@@ -20,9 +30,27 @@
 
     protected override void OnInitialized()
     {
+        UpdateSelectedTaskList();
+    }
+
+    protected override void OnParametersSet()
+    {
+        UpdateSelectedTaskList();
+    }
+
+    private void UpdateSelectedTaskList()
+    {
         if (TaskLists.Any())
         {
-            selectedTaskListName = TaskLists.First().Name;
+            // Pokud je aktuálně vybraný seznam stále platný, nechat ho.
+            if (!TaskLists.Any(tl => tl.Name == selectedTaskListName))
+            {
+                selectedTaskListName = TaskLists.First().Name;
+            }
+        }
+        else
+        {
+            selectedTaskListName = string.Empty;
         }
     }
 
@@ -41,7 +69,6 @@
 
                 await OnTaskAdded.InvokeAsync(newTask);
                 newTaskText = string.Empty;
-                selectedTaskListName = TaskLists.First().Name;
             }
         }
     }

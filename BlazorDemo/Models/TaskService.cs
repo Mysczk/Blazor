@@ -24,6 +24,11 @@ namespace BlazorDemo.Models
             taskLists.Add(new TaskListModel { Name = name });
         }
 
+        public void RemoveTaskList(TaskListModel taskList)
+        {
+            taskLists.Remove(taskList);
+        }
+
         // Method to add a new task to a specific task list
         public void AddTask(string text, TaskListModel taskList)
         {
