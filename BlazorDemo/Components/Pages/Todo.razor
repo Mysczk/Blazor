@@ -16,7 +16,7 @@
     @foreach (var taskList in GetTaskLists())
     {
         <div class="kanban-column">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div class="kanban-column-header">
                 <h4>@taskList.Name</h4>
                 <Button_2 OnClick="() => RemoveTaskList(taskList)" Type="danger">❌</Button_2>
             </div>
