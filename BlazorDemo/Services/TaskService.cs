@@ -19,15 +19,44 @@ public class TaskService
     }
 
     // Method to add a new task list
-    public void AddTaskList(string name)
+    private string errorMessage = string.Empty;
+
+    public void AddTaskList(string newTaskListName)
     {
-        taskLists.Add(new TaskListModel { Name = name });
+        if (taskLists.Any(tl => tl.Name == newTaskListName))
+        {
+            errorMessage = $"Task List '{newTaskListName}' už existuje!";
+            return;
+        }
+
+        taskLists.Add(new TaskListModel { Name = newTaskListName });
+        newTaskListName = string.Empty;
     }
 
     public void RemoveTaskList(TaskListModel taskList)
     {
         taskLists.Remove(taskList);
     }
+
+    public void UpdateTaskListName(TaskListModel updatedTaskList)
+    {
+        if (string.IsNullOrWhiteSpace(updatedTaskList.Name))
+        {
+            throw new ArgumentException("Název task listu nemůže být prázdný.");
+        }
+
+        if (taskLists.Any(tl => tl != updatedTaskList && tl.Name == updatedTaskList.Name))
+        {
+            throw new InvalidOperationException($"Task List s názvem '{updatedTaskList.Name}' už existuje.");
+        }
+
+        var existingTaskList = taskLists.FirstOrDefault(t => t == updatedTaskList);
+        if (existingTaskList != null)
+        {
+            existingTaskList.Name = updatedTaskList.Name;
+        }
+    }
+
 
     // Method to add a new task to a specific task list
     public void AddTask(string text, TaskListModel taskList)

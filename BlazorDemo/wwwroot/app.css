@@ -52,6 +52,7 @@ h1:focus {
 
 
 .task-item {
+    background-color: lightblue;
     padding: 8px;
     border: 1px solid #eee;
     margin-bottom: 8px;
@@ -67,10 +68,23 @@ h1:focus {
     border: 1px solid #ccc;
 }
 
-.kanban-board {
-    display: flex;
+
+.task-list-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 16px;
 }
+
+.task-list {
+    color: black;
+    border-radius: 8px;
+    padding: 16px;
+    width: 300px; /* width is always 300px */
+    max-height: 400px;
+    overflow-y: auto; /* enables scrolling */
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+}
+
 
 .kanban-column {
     flex: 1;
@@ -101,6 +115,7 @@ h1:focus {
     border-radius: 4px;
 }
 
+
 .add-task-form button {
     padding: 8px 16px;
     background-color: #007bff;
@@ -113,3 +128,15 @@ h1:focus {
 .add-task-form button:hover {
     background-color: #0056b3;
 }
+
+.kanban-column-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.error {
+    color: red;
+    font-weight: bold;
+}
+
