@@ -1,13 +1,17 @@
-version: '3.8'
-
 services:
-  blazor-app:
-    image: blazor-app:latest
+  blazordemo:
+    image: ${DOCKER_REGISTRY-}blazordemo
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: BlazorDemo/Dockerfile
+    depends_on:
+      - mongodb
+
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
     ports:
-      - "80:80"
-      - "443:443"
+      - "27017:27017"
     environment:
-      - ASPNETCORE_ENVIRONMENT=Production
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
