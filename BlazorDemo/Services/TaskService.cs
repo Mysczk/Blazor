@@ -67,7 +67,10 @@ public class TaskService
     // Method to move a task to a different task list
     public void MoveTask(TaskModel task, TaskListModel newTaskList)
     {
-        task.TaskList.Tasks.Remove(task);
+        if (task.TaskList != null)
+        {
+            task.TaskList.Tasks.Remove(task);
+        }
         task.TaskList = newTaskList;
         newTaskList.Tasks.Add(task);
     }

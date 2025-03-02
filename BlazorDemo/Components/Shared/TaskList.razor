@@ -1,8 +1,8 @@
 <div class="kanban-column">
     @if (!string.IsNullOrEmpty(errorMessage))
-        {
-            <p class="error">@errorMessage</p>
-        }
+    {
+        <p class="error">@errorMessage</p>
+    }
     <div class="kanban-column-header">
         @if (isEditing)
         {
@@ -24,10 +24,12 @@
     <div class="task-list">
         @foreach (var task in taskListModel.Tasks)
         {
-            <TaskItem Task="task" TaskLists="TaskLists" OnMoveTask="OnMoveTask" OnRemove="RemoveTask" />
+            <TaskItem Task="task" OnTaskSelected="ShowDetails" />
         }
     </div>
 </div>
+
+<TaskItemDetails Task="selectedTask" OnClose="CloseDetails" OnMoveTask="OnMoveTask" OnRemove="RemoveTask" TaskLists="TaskLists" />
 
 @code {
     [Parameter]
@@ -55,7 +57,7 @@
         await taskListInput.FocusAsync();
     }
 
-     private async Task SaveTaskListName()
+    private async Task SaveTaskListName()
     {
         if (string.IsNullOrWhiteSpace(taskListModel.Name))
         {
@@ -75,7 +77,6 @@
         }
     }
 
-
     private async Task HandleKeyPress(KeyboardEventArgs e)
     {
         if (e.Key == "Enter")
@@ -88,4 +89,9 @@
     {
         taskListModel.Tasks.Remove(task);
     }
+
+    private TaskModel? selectedTask = null;
+
+    private void ShowDetails(TaskModel task) => selectedTask = task;
+    private void CloseDetails() => selectedTask = null;
 }

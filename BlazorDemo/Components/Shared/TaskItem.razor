@@ -1,39 +1,8 @@
 <div class="task-item">
-    <span>@Task.Text</span>
-    <select @bind="selectedTaskListName">
-        @foreach (var taskList in TaskLists)
-        {
-            <option value="@taskList.Name">@taskList.Name</option>
-        }
-    </select>
-    <Button_2 OnClick="HandleStatusChange" Type="primary">Move</Button_2>
-    <Button_2 OnClick="OnDeleteTask" Type="danger">❌</Button_2>
+    <span @onclick="() => OnTaskSelected.InvokeAsync(Task)" class="clickable">@Task.Text</span>
 </div>
 
 @code {
+    [Parameter] public EventCallback<TaskModel> OnTaskSelected { get; set; }
     [Parameter] public TaskModel Task { get; set; } = new TaskModel();
-    [Parameter] public EventCallback<(TaskModel task, TaskListModel newTaskList)> OnMoveTask { get; set; }
-    [Parameter] public EventCallback<TaskModel> OnRemove { get; set; }
-    [Parameter] public List<TaskListModel> TaskLists { get; set; } = new List<TaskListModel>();
-
-    private string ?selectedTaskListName;
-
-    protected override void OnParametersSet()
-    {
-        selectedTaskListName = Task.TaskList?.Name;
-    }
-
-    private async Task HandleStatusChange()
-    {
-        var selectedTaskList = TaskLists.FirstOrDefault(tl => tl.Name == selectedTaskListName);
-        if (selectedTaskList != null)
-        {
-            await OnMoveTask.InvokeAsync((Task, selectedTaskList));
-        }
-    }
-
-    private async Task OnDeleteTask()
-    {
-        await OnRemove.InvokeAsync(Task);
-    }
 }
