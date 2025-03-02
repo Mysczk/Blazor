@@ -1,0 +1,56 @@
+﻿@page "/todo"
+@inject TaskService TaskService
+
+<PageTitle>Task Board</PageTitle>
+
+<h3>Task Board</h3>
+
+<!-- Form to add a new task list -->
+<AddTaskListForm OnTaskListAdded="HandleTaskListAdded" />
+
+<!-- Form to add a new task -->
+<AddTaskForm OnTaskAdded="HandleTaskAdded" TaskLists=@GetTaskLists() />
+
+<!-- Kanban board -->
+<div class="kanban-board">
+    @foreach (var taskList in GetTaskLists())
+    {
+        <div class="kanban-column">
+            <div class="kanban-column-header">
+                <h4>@taskList.Name</h4>
+                <Button_2 OnClick="() => RemoveTaskList(taskList)" Type="danger">❌</Button_2>
+            </div>
+            <TaskList taskListModel="taskList" TaskLists=@GetTaskLists() OnMoveTask="HandleMoveTask"/>
+        </div>
+    }
+</div>
+
+@code {
+    private void HandleTaskListAdded(string newTaskListName)
+    {
+        TaskService.AddTaskList(newTaskListName);
+    }
+
+    private List<TaskListModel> GetTaskLists()
+    {
+        return TaskService.GetTaskLists();
+    }
+
+
+
+    private void HandleTaskAdded(TaskModel newTask)
+    {
+        Console.WriteLine("Tady jsem v metodě HandleTaskAdded()");
+        TaskService.AddTask(newTask.Text, newTask.TaskList);
+    }
+
+    private void HandleMoveTask((TaskModel task, TaskListModel newTaskList) moveTask)
+    {
+        TaskService.MoveTask(moveTask.task, moveTask.newTaskList);
+    }
+
+    private void RemoveTaskList(TaskListModel taskList)
+    {
+        TaskService.RemoveTaskList(taskList);
+    }
+}

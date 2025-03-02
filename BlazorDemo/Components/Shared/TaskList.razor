@@ -1,0 +1,27 @@
+
+@foreach (var task in taskListModel.Tasks)
+{
+    <TaskItem Task="task" TaskLists="TaskLists" OnMoveTask="HandleMoveTask" OnRemove="RemoveTask" />
+}
+
+
+@code {
+    [Parameter]
+    public TaskListModel taskListModel { get; set; } = new TaskListModel();
+    [Parameter]
+    public List<TaskListModel> TaskLists { get; set; } = new List<TaskListModel>();
+    
+    [Parameter]
+    public EventCallback<(TaskModel task, TaskListModel newTaskList)> OnMoveTask { get; set; }
+
+    private void RemoveTask(TaskModel task)
+    {
+        taskListModel.Tasks.Remove(task);
+    }
+
+    private async Task HandleMoveTask((TaskModel task, TaskListModel newTaskList) moveTask)
+    {
+        await OnMoveTask.InvokeAsync(moveTask);
+    }
+
+}

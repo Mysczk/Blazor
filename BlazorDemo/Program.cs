@@ -1,5 +1,6 @@
 using BlazorDemo.Components;
 using BlazorDemo.Services;
+
 using MongoDB.Driver;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,6 +18,8 @@ builder.Services.AddSingleton<IMongoClient, MongoClient>(sp => new MongoClient(m
 
 // Register MongoDbService
 builder.Services.AddSingleton<MongoDbService>();
+// Registrace služby jako singleton
+builder.Services.AddSingleton<TaskService>();
 
 var app = builder.Build();
 
