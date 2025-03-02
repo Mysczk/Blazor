@@ -52,12 +52,130 @@ h1:focus {
 
 
 .task-item {
+    background-color: lightblue;
+    padding: 8px;
+    border: 1px solid #eee;
+    margin-bottom: 8px;
+    border-radius: 4px;
     display: flex;
+    justify-content: space-between;
     align-items: center;
+}
+
+.task-item select {
+    padding: 4px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+
+.task-list-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 16px;
+}
+
+.task-list {
+    color: black;
+    border-radius: 8px;
+    padding: 16px;
+    width: 300px; /* width is always 300px */
+    max-height: 400px;
+    overflow-y: auto; /* enables scrolling */
+}
+
+
+.kanban-column {
+    flex: 1;
+    border: 1px solid #ccc;
+    padding: 16px;
+    border-radius: 8px;
+}
+
+.task-list {
+    margin-top: 8px;
+}
+.add-task-form {
+    margin-bottom: 20px;
+    display: flex;
     gap: 10px;
 }
 
-.task-done {
-    text-decoration: line-through;
-    color: gray;
+.add-task-form input {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    flex: 1;
+}
+
+.add-task-form select {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+
+.add-task-form button {
+    padding: 8px 16px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.add-task-form button:hover {
+    background-color: #0056b3;
+}
+
+.kanban-column-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.error {
+    color: red;
+    font-weight: cursive;
+}
+
+.task-details-sidebar {
+    position: fixed;
+    right: 0;
+    top: 0;
+    width: 300px;
+    height: 100vh;
+    background: white;
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    overflow-y: auto;
+    z-index: 1000; /* Ensure it appears above other content */
+}
+
+.task-name-input {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    font-size: 1.2em;
+}
+
+.task-description-input {
+    width: 100%;
+    height: 100px;
+    padding: 8px;
+    margin-bottom: 10px;
+}
+
+.task-due-date-input {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+}
+.clickable {
+    cursor: pointer;
+    text-decoration: underline;
+    color: blue;
+}
+.clickable:hover {
+    color: darkblue;
 }

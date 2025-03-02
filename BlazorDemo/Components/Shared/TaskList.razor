@@ -1,44 +1,97 @@
-<div>
-    <input type="text" @bind="newTaskText" placeholder="Enter task..." @bind:event="oninput" @onkeypress="KeyPress"/>
-    <Button_2 OnClick="AddTask" Type="primary">➕ Add</Button_2>
-
-    <ul>
-        @foreach (var task in tasks)
+<div class="kanban-column">
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <p class="error">@errorMessage</p>
+    }
+    <div class="kanban-column-header">
+        @if (isEditing)
         {
-            <li>
-                <TaskItem Task="task" OnRemove="RemoveTask" />
-            </li>
+            <input @bind="taskListModel.Name"
+                   @onblur="SaveTaskListName"
+                   @bind:event="oninput"
+                   @onkeypress="HandleKeyPress"
+                   @ref="taskListInput"
+                   class="task-list-input"
+                   autofocus />
         }
-    </ul>
+        else
+        {
+            <h4 @ondblclick="StartEditing">@taskListModel.Name</h4>
+        }
+        <Button_2 OnClick="() => OnRemoveTaskList.InvokeAsync(taskListModel)" Type="danger">❌</Button_2>
+    </div>
+
+    <div class="task-list">
+        @foreach (var task in taskListModel.Tasks)
+        {
+            <TaskItem Task="task" OnTaskSelected="ShowDetails" />
+        }
+    </div>
 </div>
 
+<TaskItemDetails Task="selectedTask" OnClose="CloseDetails" OnMoveTask="OnMoveTask" OnRemove="RemoveTask" TaskLists="TaskLists" />
+
 @code {
-    private List<TaskModel> tasks = new()
-    {
-        new TaskModel { Text = "Dokončit Blazor projekt", IsDone = false },
-        new TaskModel { Text = "Udělat prezentaci", IsDone = true },
-        new TaskModel { Text = "Udělat úlohy pro cvičení", IsDone = false }
-    };
+    [Parameter]
+    public TaskListModel taskListModel { get; set; } = new();
 
-    private string newTaskText = string.Empty;
+    [Parameter]
+    public List<TaskListModel> TaskLists { get; set; } = new();
 
-    private void AddTask()
+    [Parameter]
+    public EventCallback<TaskListModel> OnRenameTaskList { get; set; }
+    [Parameter]
+    public EventCallback<(TaskModel task, TaskListModel newTaskList)> OnMoveTask { get; set; }
+
+    [Parameter]
+    public EventCallback<TaskListModel> OnRemoveTaskList { get; set; }
+
+    private bool isEditing = false;
+    private ElementReference taskListInput;
+    private string? errorMessage;
+
+    private async Task StartEditing()
     {
-        if (!string.IsNullOrWhiteSpace(newTaskText))
+        isEditing = true;
+        await Task.Delay(50);
+        await taskListInput.FocusAsync();
+    }
+
+    private async Task SaveTaskListName()
+    {
+        if (string.IsNullOrWhiteSpace(taskListModel.Name))
         {
-            tasks.Add(new TaskModel { Text = newTaskText });
-            newTaskText = string.Empty;
+            errorMessage = "Název task listu nemůže být prázdný.";
+            return;
+        }
+
+        try
+        {
+            await OnRenameTaskList.InvokeAsync(taskListModel);
+            isEditing = false;
+            errorMessage = null; // Resetujeme chybu, pokud vše proběhlo ok
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message; // Uložíme text chyby pro zobrazení
         }
     }
-    void KeyPress(KeyboardEventArgs e)
+
+    private async Task HandleKeyPress(KeyboardEventArgs e)
     {
-        if (e.Key == "Enter" && !string.IsNullOrEmpty(newTaskText))
-            AddTask();
+        if (e.Key == "Enter")
+        {
+            await SaveTaskListName();
+        }
     }
 
     private void RemoveTask(TaskModel task)
     {
-        tasks.Remove(task);
+        taskListModel.Tasks.Remove(task);
     }
-}
 
+    private TaskModel? selectedTask = null;
+
+    private void ShowDetails(TaskModel task) => selectedTask = task;
+    private void CloseDetails() => selectedTask = null;
+}

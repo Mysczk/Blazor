@@ -1,14 +1,25 @@
 using BlazorDemo.Components;
+using BlazorDemo.Services;
+
+using MongoDB.Driver;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Blazor bootstrap services registraiton
+// Blazor bootstrap services registration
 builder.Services.AddBlazorBootstrap();
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
-    
+
+// Configure MongoDB client
+var mongoConnectionString = builder.Configuration.GetConnectionString("MongoDb");
+builder.Services.AddSingleton<IMongoClient, MongoClient>(sp => new MongoClient(mongoConnectionString));
+
+// Register MongoDbService
+builder.Services.AddSingleton<MongoDbService>();
+// Registrace služby jako singleton
+builder.Services.AddSingleton<TaskService>();
 
 var app = builder.Build();
 

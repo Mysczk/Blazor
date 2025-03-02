@@ -1,0 +1,41 @@
+<div class="add-task-list-form">
+    <input @bind="newTaskListName" placeholder="Enter task list name" @bind:event="oninput" @onkeypress="HandleKeyPress" />
+    <Button_2 OnClick="AddTaskList" Type="secondary">Add Task List</Button_2>
+
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <p class="error">@errorMessage</p>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public EventCallback<string> OnTaskListAdded { get; set; }
+    [Parameter]
+    public List<TaskListModel> ExistingTaskLists { get; set; } = new();
+
+    private string newTaskListName = string.Empty;
+    private string? errorMessage;
+
+    private async Task AddTaskList()
+    {
+        
+        if (ExistingTaskLists.Any(tl => tl.Name.Equals(newTaskListName, StringComparison.OrdinalIgnoreCase)))
+        {
+            errorMessage = $"Task List '{newTaskListName}' already exists!";
+            return;
+        }
+
+        await OnTaskListAdded.InvokeAsync(newTaskListName);
+        newTaskListName = string.Empty;
+        errorMessage = null; // Reset error
+    }
+
+    private async Task HandleKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await AddTaskList();
+        }
+    }
+}

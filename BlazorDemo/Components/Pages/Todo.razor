@@ -1,5 +1,64 @@
 ﻿@page "/todo"
+@inject TaskService TaskService
 
-<h3>To-Do List</h3>
+<PageTitle>Task Board</PageTitle>
 
-<TaskList />
+<h3>Task Board</h3>
+
+<!-- Form to add a new task list -->
+<AddTaskListForm OnTaskListAdded="HandleTaskListAdded" ExistingTaskLists="@GetTaskLists()" />
+
+<!-- Form to add a new task -->
+<AddTaskForm OnTaskAdded="HandleTaskAdded" TaskLists=@GetTaskLists() />
+
+<!-- Kanban board -->
+<div class="task-list-container">
+    @foreach (var taskList in GetTaskLists())
+    {
+        <TaskList taskListModel="taskList"
+                TaskLists="@GetTaskLists()"
+                OnMoveTask="HandleMoveTask"
+                OnRenameTaskList="HandleRenameTaskList"
+                OnRemoveTaskList="RemoveTaskList" />
+    }
+</div>
+
+
+
+
+@code {
+    private void HandleTaskListAdded(string newTaskListName)
+    {
+        TaskService.AddTaskList(newTaskListName);
+    }
+
+    private List<TaskListModel> GetTaskLists()
+    {
+        return TaskService.GetTaskLists();
+    }
+
+    private void HandleRenameTaskList(TaskListModel updatedTaskList)
+    {
+        TaskService.UpdateTaskListName(updatedTaskList);
+    }
+
+    private void HandleTaskAdded(TaskModel newTask)
+    {
+        if (newTask.TaskList != null)
+        {
+            TaskService.AddTask(newTask.Text, newTask.TaskList);
+        }
+    }
+
+    private void HandleMoveTask((TaskModel task, TaskListModel newTaskList) moveTask)
+    {
+        TaskService.MoveTask(moveTask.task, moveTask.newTaskList);
+    }
+
+    private void RemoveTaskList(TaskListModel taskList)
+    {
+        TaskService.RemoveTaskList(taskList);
+    }
+
+    
+}
