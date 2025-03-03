@@ -5,12 +5,6 @@
 
 <h3>Task Board</h3>
 
-<!-- Form to add a new task list -->
-<AddTaskListForm OnTaskListAdded="HandleTaskListAdded" ExistingTaskLists="@GetTaskLists()" />
-
-<!-- Form to add a new task -->
-<AddTaskForm OnTaskAdded="HandleTaskAdded" TaskLists=@GetTaskLists() />
-
 <!-- Kanban board -->
 <div class="task-list-container">
     @foreach (var taskList in GetTaskLists())
@@ -21,15 +15,25 @@
                 OnRenameTaskList="HandleRenameTaskList"
                 OnRemoveTaskList="RemoveTaskList" />
     }
+
+    <!-- Přidání nového TaskListu -->
+    <div class="kanban-column add-task-list-column">
+        @if (showAddTaskListInput)
+        {
+            <AddTaskListForm OnTaskListAdded="HandleTaskListAdded" ExistingTaskLists="@GetTaskLists()" />
+        }
+        else
+        {
+            <Button_2 OnClick="ShowAddTaskListInput" Type="primary">+ Přidat seznam</Button_2>
+        }
+    </div>
 </div>
-
-
-
 
 @code {
     private void HandleTaskListAdded(string newTaskListName)
     {
         TaskService.AddTaskList(newTaskListName);
+        showAddTaskListInput = false;
     }
 
     private List<TaskListModel> GetTaskLists()
@@ -42,12 +46,10 @@
         TaskService.UpdateTaskListName(updatedTaskList);
     }
 
-    private void HandleTaskAdded(TaskModel newTask)
+    private bool showAddTaskListInput = false;
+    private void ShowAddTaskListInput()
     {
-        if (newTask.TaskList != null)
-        {
-            TaskService.AddTask(newTask.Text, newTask.TaskList);
-        }
+        showAddTaskListInput = true;
     }
 
     private void HandleMoveTask((TaskModel task, TaskListModel newTaskList) moveTask)
@@ -59,6 +61,4 @@
     {
         TaskService.RemoveTaskList(taskList);
     }
-
-    
 }

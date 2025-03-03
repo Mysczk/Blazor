@@ -27,6 +27,18 @@
             <TaskItem Task="task" OnTaskSelected="ShowDetails" />
         }
     </div>
+
+    <!-- Přidání nového úkolu -->
+    <div style="text-align: center;">
+        @if (showAddTaskListInput)
+        {
+            <AddTaskForm OnTaskAdded="HandleTaskAdded" TaskList="taskListModel" />
+        }
+        else
+        {
+            <Button_2 OnClick="ShowAddTaskListInput" Type="primary">+ Přidat úkol</Button_2>
+        }
+    </div>
 </div>
 
 <TaskItemDetails Task="selectedTask" OnClose="CloseDetails" OnMoveTask="OnMoveTask" OnRemove="RemoveTask" TaskLists="TaskLists" />
@@ -49,12 +61,25 @@
     private bool isEditing = false;
     private ElementReference taskListInput;
     private string? errorMessage;
+    private bool showAddTaskListInput = false;
+
+    private TaskModel? selectedTask = null;
 
     private async Task StartEditing()
     {
         isEditing = true;
         await Task.Delay(50);
         await taskListInput.FocusAsync();
+    }
+
+    private void ShowAddTaskListInput()
+    {
+        showAddTaskListInput = true;
+    }
+
+    private void HideAddTaskListInput()
+    {
+        showAddTaskListInput = false;
     }
 
     private async Task SaveTaskListName()
@@ -90,8 +115,12 @@
         taskListModel.Tasks.Remove(task);
     }
 
-    private TaskModel? selectedTask = null;
-
     private void ShowDetails(TaskModel task) => selectedTask = task;
     private void CloseDetails() => selectedTask = null;
+
+    private void HandleTaskAdded(TaskModel newTask)
+    {
+        taskListModel.Tasks.Add(newTask);
+        HideAddTaskListInput();
+    }
 }

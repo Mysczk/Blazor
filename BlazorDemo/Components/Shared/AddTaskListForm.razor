@@ -1,6 +1,6 @@
-<div class="add-task-list-form">
-    <input @bind="newTaskListName" placeholder="Enter task list name" @bind:event="oninput" @onkeypress="HandleKeyPress" />
-    <Button_2 OnClick="AddTaskList" Type="secondary">Add Task List</Button_2>
+<div class="add-task-form">
+    <input @bind="newTaskListName" placeholder="Zadejte název seznamu" @bind:event="oninput" @onkeypress="HandleKeyPress" />
+    <Button_2 OnClick="AddTaskList" Type="secondary">Přidat seznam</Button_2>
 
     @if (!string.IsNullOrEmpty(errorMessage))
     {
@@ -11,6 +11,7 @@
 @code {
     [Parameter]
     public EventCallback<string> OnTaskListAdded { get; set; }
+
     [Parameter]
     public List<TaskListModel> ExistingTaskLists { get; set; } = new();
 
@@ -19,16 +20,21 @@
 
     private async Task AddTaskList()
     {
-        
+        if (string.IsNullOrWhiteSpace(newTaskListName))
+        {
+            errorMessage = "Název seznamu nemůže být prázdný.";
+            return;
+        }
+
         if (ExistingTaskLists.Any(tl => tl.Name.Equals(newTaskListName, StringComparison.OrdinalIgnoreCase)))
         {
-            errorMessage = $"Task List '{newTaskListName}' already exists!";
+            errorMessage = $"Seznam '{newTaskListName}' již existuje!";
             return;
         }
 
         await OnTaskListAdded.InvokeAsync(newTaskListName);
         newTaskListName = string.Empty;
-        errorMessage = null; // Reset error
+        errorMessage = null; // Resetujeme chybu
     }
 
     private async Task HandleKeyPress(KeyboardEventArgs e)

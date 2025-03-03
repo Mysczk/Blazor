@@ -1,76 +1,39 @@
 <div class="add-task-form">
-    <input @bind="newTaskText" placeholder="Enter task name"  @bind:event="oninput" @onkeypress="HandleKeyPress" />
-
-    <select @bind="selectedTaskListName">
-        @if (TaskLists.Any())
-        {
-            @foreach (var taskList in TaskLists)
-            {
-                <option value="@taskList.Name">@taskList.Name</option>
-            }
-        }
-        else
-        {
-            <option disabled>No task lists available</option>
-        }
-    </select>
-
-    <Button_2 OnClick="AddTask" Type="secondary" disabled="@(TaskLists.Count == 0)">Add Task</Button_2>
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <p class="error">@errorMessage</p>
+    }
+    <input @bind="newTaskText" placeholder="Zadejte název úkolu" @bind:event="oninput" @onkeypress="HandleKeyPress" />
+    <Button_2 OnClick="AddTask" Type="secondary">Přidat úkol</Button_2>
 </div>
 
 @code {
     [Parameter]
     public EventCallback<TaskModel> OnTaskAdded { get; set; }
-    
+
     [Parameter]
-    public List<TaskListModel> TaskLists { get; set; } = new List<TaskListModel>();
+    public TaskListModel TaskList { get; set; } = new();
 
     private string newTaskText = string.Empty;
-    private string selectedTaskListName = string.Empty;
-
-    protected override void OnInitialized()
-    {
-        UpdateSelectedTaskList();
-    }
-
-    protected override void OnParametersSet()
-    {
-        UpdateSelectedTaskList();
-    }
-
-    private void UpdateSelectedTaskList()
-    {
-        if (TaskLists.Any())
-        {
-            // Pokud je aktuálně vybraný seznam stále platný, nechat ho.
-            if (!TaskLists.Any(tl => tl.Name == selectedTaskListName))
-            {
-                selectedTaskListName = TaskLists.First().Name;
-            }
-        }
-        else
-        {
-            selectedTaskListName = string.Empty;
-        }
-    }
+    private string? errorMessage;
 
     private async Task AddTask()
     {
-        if (!string.IsNullOrWhiteSpace(newTaskText) && !string.IsNullOrWhiteSpace(selectedTaskListName))
+        if (string.IsNullOrWhiteSpace(newTaskText))
         {
-            var selectedTaskList = TaskLists.FirstOrDefault(tl => tl.Name == selectedTaskListName);
-            if (selectedTaskList != null)
-            {
-                var newTask = new TaskModel
-                {
-                    Text = newTaskText,
-                    TaskList = selectedTaskList
-                };
-
-                await OnTaskAdded.InvokeAsync(newTask);
-                newTaskText = string.Empty;
-            }
+            errorMessage = "Název úkolu nemůže být prázdný.";
+            return;
         }
+
+        var newTask = new TaskModel
+        {
+            Text = newTaskText,
+            TaskList = TaskList
+        };
+
+        await OnTaskAdded.InvokeAsync(newTask);
+        newTaskText = string.Empty; // Vyčistíme input
+        errorMessage = null; // Resetujeme chybu
     }
 
     private async Task HandleKeyPress(KeyboardEventArgs e)
