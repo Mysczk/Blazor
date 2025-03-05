@@ -1,77 +1,131 @@
 using BlazorDemo.Models;
-namespace BlazorDemo.Services;
-public class TaskService
+using System.Collections.Generic;
+using System.IO;
+using System.Text.Json;
+using System.Threading.Tasks;
+
+namespace BlazorDemo.Services
 {
-    private List<TaskListModel> taskLists = new List<TaskListModel>();
-    public TaskListModel DefaultTaskList { get; private set; }
-
-    public TaskService()
+    public class TaskService
     {
-        // Initialize the default task list
-        DefaultTaskList = new TaskListModel { Name = "ToDo" };
-        taskLists.Add(DefaultTaskList);
-    }
+        private List<TaskListModel> taskLists = new List<TaskListModel>();
+        private readonly string _filePath = "Data/tasks.json"; // Cesta k souboru pro ukládání dat
 
-    // Method to get all task lists
-    public List<TaskListModel> GetTaskLists()
-    {
-        return taskLists;
-    }
-
-    // Method to add a new task list
-    private string errorMessage = string.Empty;
-
-    public void AddTaskList(string newTaskListName)
-    {
-        if (taskLists.Any(tl => tl.Name == newTaskListName))
+        public TaskListModel DefaultTaskList { get; private set; }
+        public TaskService()
         {
-            errorMessage = $"Task List '{newTaskListName}' už existuje!";
-            return;
+
+            // Pokud neexistuje žádný seznam úkolů, vytvořte výchozí seznam
+            if (!taskLists.Any())
+            {
+                DefaultTaskList = new TaskListModel { Name = "ToDo" };
+                taskLists.Add(DefaultTaskList);
+            }
+            else
+            {
+                DefaultTaskList = taskLists.FirstOrDefault(tl => tl.Name == "ToDo") ?? taskLists.First();
+            }
         }
 
-        taskLists.Add(new TaskListModel { Name = newTaskListName });
-        newTaskListName = string.Empty;
-    }
-
-    public void RemoveTaskList(TaskListModel taskList)
-    {
-        taskLists.Remove(taskList);
-    }
-
-    public void UpdateTaskListName(TaskListModel updatedTaskList)
-    {
-        if (string.IsNullOrWhiteSpace(updatedTaskList.Name))
+        // Metoda pro získání všech seznamů úkolů
+        public List<TaskListModel> GetTaskLists()
         {
-            throw new ArgumentException("Název task listu nemůže být prázdný.");
+            return taskLists;
         }
 
-        if (taskLists.Any(tl => tl != updatedTaskList && tl.Name == updatedTaskList.Name))
+        // Metoda pro přidání nového seznamu úkolů
+        public void AddTaskList(string name)
         {
-            throw new InvalidOperationException($"Task List s názvem '{updatedTaskList.Name}' už existuje.");
+            taskLists.Add(new TaskListModel { Name = name });
+          //  SaveTasksAsync().Wait(); // Uložte data po přidání seznamu
         }
 
-        var existingTaskList = taskLists.FirstOrDefault(t => t == updatedTaskList);
-        if (existingTaskList != null)
+        // Metoda pro přidání úkolu do seznamu
+        public void AddTask(string taskListName, string taskText)
         {
-            existingTaskList.Name = updatedTaskList.Name;
+            var taskList = taskLists.FirstOrDefault(tl => tl.Name == taskListName);
+            if (taskList != null)
+            {
+                taskList.Tasks.Add(new TaskModel { Text = taskText });
+                SaveTasksAsync().Wait(); // Uložte data po přidání úkolu
+            }
         }
-    }
 
-
-    // Method to add a new task to a specific task list
-    public void AddTask(string text, TaskListModel taskList)
-    {
-        taskList.Tasks.Add(new TaskModel { Text = text, TaskList = taskList });
-    }
-
-    // Method to move a task to a different task list
-    public void MoveTask(TaskModel task, TaskListModel newTaskList)
-    {
-        if (task.TaskList != null)
+        // Metoda pro přesunutí úkolu do jiného seznamu
+        public void MoveTask(TaskModel task, string targetTaskListName)
         {
-            task.TaskList.Tasks.Remove(task);
+            var sourceTaskList = taskLists.FirstOrDefault(tl => tl.Name == task.TaskListName);
+            if (sourceTaskList != null)
+            {
+                sourceTaskList.Tasks.Remove(task);
+
+                var targetTaskList = taskLists.FirstOrDefault(tl => tl.Name == targetTaskListName);
+                if (targetTaskList != null)
+                {
+                    targetTaskList.Tasks.Add(task);
+                    SaveTasksAsync().Wait(); // Uložte data po přesunutí úkolu
+                }
+            }
         }
-        task.TaskList = newTaskList;
-        newTaskList.Tasks.Add(task);
+
+        // Metoda pro smazání seznamu úkolů
+        public void RemoveTaskList(string name)
+        {
+            var taskList = taskLists.FirstOrDefault(tl => tl.Name == name);
+            if (taskList != null)
+            {
+                taskLists.Remove(taskList);
+                SaveTasksAsync().Wait(); // Uložte data po smazání seznamu
+            }
+        }
+
+        public void UpdateTaskListName(TaskListModel updatedTaskList)
+        {
+            if (string.IsNullOrWhiteSpace(updatedTaskList.Name))
+            {
+                throw new ArgumentException("Název task listu nemůže být prázdný.");
+            }
+
+            if (taskLists.Any(tl => tl != updatedTaskList && tl.Name == updatedTaskList.Name))
+            {
+                throw new InvalidOperationException($"Task List s názvem '{updatedTaskList.Name}' už existuje.");
+            }
+
+            var existingTaskList = taskLists.FirstOrDefault(t => t == updatedTaskList);
+            if (existingTaskList != null)
+            {
+                existingTaskList.Name = updatedTaskList.Name;
+                SaveTasksAsync().Wait(); // Uložte data po aktualizaci názvu
+            }
+        }
+
+        // Metoda pro smazání úkolu ze seznamu
+        public void RemoveTask(string taskListName, TaskModel task)
+        {
+            var taskList = taskLists.FirstOrDefault(tl => tl.Name == taskListName);
+            if (taskList != null)
+            {
+                taskList.Tasks.Remove(task);
+             //   SaveTasksAsync().Wait(); // Uložte data po smazání úkolu
+            }
+        }
+
+        // Metoda pro ukládání dat do JSON souboru
+        public async Task SaveTasksAsync()
+        {
+            var options = new JsonSerializerOptions { WriteIndented = true }; // Formátování JSONu
+            string json = JsonSerializer.Serialize(taskLists, options);
+            await File.WriteAllTextAsync(_filePath, json);
+        }
+
+        // Metoda pro načítání dat z JSON souboru
+        public async Task LoadTasksAsync()
+        {
+            if (File.Exists(_filePath))
+            {
+                string json = await File.ReadAllTextAsync(_filePath);
+                taskLists = JsonSerializer.Deserialize<List<TaskListModel>>(json) ?? new List<TaskListModel>();
+            }
+        }
     }
 }

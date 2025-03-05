@@ -5,6 +5,8 @@
 
 <h3>Task Board</h3>
 
+<Button_2 OnClick="LoadDataAsync" Type="primary">Load Tasks</Button_2>
+
 <!-- Kanban board -->
 <div class="task-list-container">
     @foreach (var taskList in GetTaskLists())
@@ -33,7 +35,7 @@
     private void HandleTaskListAdded(string newTaskListName)
     {
         TaskService.AddTaskList(newTaskListName);
-        showAddTaskListInput = false;
+        HideAddTaskListInput();
     }
 
     private List<TaskListModel> GetTaskLists()
@@ -51,14 +53,25 @@
     {
         showAddTaskListInput = true;
     }
-
-    private void HandleMoveTask((TaskModel task, TaskListModel newTaskList) moveTask)
+    private void HideAddTaskListInput()
     {
-        TaskService.MoveTask(moveTask.task, moveTask.newTaskList);
+        showAddTaskListInput = false;
     }
 
-    private void RemoveTaskList(TaskListModel taskList)
+    private void HandleMoveTask((TaskModel task, string targetTaskList) moveTask)
+    {
+        TaskService.MoveTask(moveTask.task, moveTask.targetTaskList);
+    }
+
+    private void RemoveTaskList(string taskList)
     {
         TaskService.RemoveTaskList(taskList);
     }
+
+    private async Task LoadDataAsync()
+    {
+        await TaskService.LoadTasksAsync();
+    }
+
+   
 }

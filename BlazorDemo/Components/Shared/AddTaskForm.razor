@@ -28,7 +28,7 @@
         var newTask = new TaskModel
         {
             Text = newTaskText,
-            TaskList = TaskList
+            TaskListName = TaskList.Name
         };
 
         await OnTaskAdded.InvokeAsync(newTask);

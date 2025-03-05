@@ -29,19 +29,22 @@
 }
 
 @code {
-    [Parameter] public TaskModel? Task { get; set; }
+    [Parameter] public TaskModel Task { get; set; } = new TaskModel();
     [Parameter] public EventCallback OnClose { get; set; }
-    [Parameter] public EventCallback<(TaskModel task, TaskListModel newTaskList)> OnMoveTask { get; set; }
+    [Parameter] public EventCallback<(TaskModel task, string targetTaskList)> OnMoveTask { get; set; }
     [Parameter] public EventCallback<TaskModel> OnRemove { get; set; }
     [Parameter] public List<TaskListModel> TaskLists { get; set; } = new List<TaskListModel>();
 
-    private string? selectedTaskListName;
+    private string selectedTaskListName = "ToDo";
     private bool isEditing = false;
     private string editModeText = "Edit";
 
     protected override void OnParametersSet()
     {
-        selectedTaskListName = Task?.TaskList?.Name;
+        if (Task != null)
+        {
+            selectedTaskListName = Task.TaskListName;
+        }
         isEditing = false;
         editModeText = isEditing ? "Save" : "Edit";
     }
@@ -50,22 +53,18 @@
     {
         OnClose.InvokeAsync();
     } 
-        
 
     private void ToggleEditMode()
     {
         isEditing = !isEditing;
         editModeText = isEditing ? "Save" : "Edit";
+
     }
 
     private async Task HandleStatusChange()
     {
-        var selectedTaskList = TaskLists.FirstOrDefault(tl => tl.Name == selectedTaskListName);
-        if (selectedTaskList != null && Task != null)
-        {
-            await OnMoveTask.InvokeAsync((Task, selectedTaskList));
-            Close();
-        }
+        await OnMoveTask.InvokeAsync((Task, selectedTaskListName));
+        Close();
     }
 
     private async Task RemoveTask()
