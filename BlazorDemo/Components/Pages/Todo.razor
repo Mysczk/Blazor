@@ -6,6 +6,7 @@
 <h3>Task Board</h3>
 
 <Button_2 OnClick="LoadDataAsync" Type="primary">Load Tasks</Button_2>
+<Button_2 OnClick="SaveDataAsync" Type="primary">Save Tasks</Button_2>
 
 <!-- Kanban board -->
 <div class="task-list-container">
@@ -71,6 +72,11 @@
     private async Task LoadDataAsync()
     {
         await TaskService.LoadTasksAsync();
+    }
+
+    private async Task SaveDataAsync()
+    {
+        await TaskService.SaveTasksAsync();
     }
 
    

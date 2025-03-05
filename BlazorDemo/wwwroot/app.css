@@ -238,5 +238,6 @@ h1:focus {
 /* ==================== */
 .error {
     color: red;
-    font-weight: bold;
+    font-weight: cursive;
+    font-size: small;
 }

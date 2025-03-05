@@ -1,8 +1,5 @@
 using BlazorDemo.Models;
-using System.Collections.Generic;
-using System.IO;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace BlazorDemo.Services
 {
@@ -43,11 +40,12 @@ namespace BlazorDemo.Services
         // Metoda pro přidání úkolu do seznamu
         public void AddTask(string taskListName, string taskText)
         {
+            Console.WriteLine("AddTask in TaskService");
             var taskList = taskLists.FirstOrDefault(tl => tl.Name == taskListName);
             if (taskList != null)
             {
                 taskList.Tasks.Add(new TaskModel { Text = taskText });
-                SaveTasksAsync().Wait(); // Uložte data po přidání úkolu
+            //    SaveTasksAsync().Wait(); // Uložte data po přidání úkolu
             }
         }
 
@@ -55,15 +53,16 @@ namespace BlazorDemo.Services
         public void MoveTask(TaskModel task, string targetTaskListName)
         {
             var sourceTaskList = taskLists.FirstOrDefault(tl => tl.Name == task.TaskListName);
+
             if (sourceTaskList != null)
             {
-                sourceTaskList.Tasks.Remove(task);
-
                 var targetTaskList = taskLists.FirstOrDefault(tl => tl.Name == targetTaskListName);
                 if (targetTaskList != null)
                 {
+                    sourceTaskList.Tasks.Remove(task);
                     targetTaskList.Tasks.Add(task);
-                    SaveTasksAsync().Wait(); // Uložte data po přesunutí úkolu
+                    task.TaskListName = targetTaskListName;
+                //    SaveTasksAsync().Wait(); // Uložte data po přesunutí úkolu
                 }
             }
         }
@@ -75,7 +74,7 @@ namespace BlazorDemo.Services
             if (taskList != null)
             {
                 taskLists.Remove(taskList);
-                SaveTasksAsync().Wait(); // Uložte data po smazání seznamu
+           //     SaveTasksAsync().Wait(); // Uložte data po smazání seznamu
             }
         }
 
@@ -95,7 +94,7 @@ namespace BlazorDemo.Services
             if (existingTaskList != null)
             {
                 existingTaskList.Name = updatedTaskList.Name;
-                SaveTasksAsync().Wait(); // Uložte data po aktualizaci názvu
+          //      SaveTasksAsync().Wait(); // Uložte data po aktualizaci názvu
             }
         }
 

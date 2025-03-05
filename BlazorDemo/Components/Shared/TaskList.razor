@@ -1,4 +1,4 @@
-
+@inject TaskService TaskService
 
 <div class="kanban-column">
     @if (!string.IsNullOrEmpty(errorMessage))
@@ -34,7 +34,7 @@
     <div style="text-align: center;">
         @if (showAddTaskListInput)
         {
-            <AddTaskForm OnTaskAdded="HandleTaskAdded" TaskList="taskListModel" />
+            <AddTaskForm OnTaskAdded="AddTask"/>
         }
         else
         {
@@ -55,7 +55,7 @@
     [Parameter]
     public EventCallback<TaskListModel> OnRenameTaskList { get; set; }
     [Parameter]
-    public EventCallback<(TaskModel task, string targetTaskList)> OnMoveTask { get; set; }
+    public EventCallback<(TaskModel task, string targetTaskListName)> OnMoveTask { get; set; }
 
     [Parameter]
     public EventCallback<string> OnRemoveTaskList { get; set; }
@@ -120,9 +120,9 @@
     private void ShowDetails(TaskModel task) => selectedTask = task;
     private void CloseDetails() => selectedTask = null;
 
-    private void HandleTaskAdded(TaskModel newTask)
+    private void AddTask(string newTaskText)
     {
-        taskListModel.Tasks.Add(newTask);
+        TaskService.AddTask(taskListModel.Name, newTaskText);
         HideAddTaskListInput();
     }
 }
