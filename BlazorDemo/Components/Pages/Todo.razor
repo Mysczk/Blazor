@@ -4,10 +4,10 @@
 <PageTitle>Task Board</PageTitle>
 
 <h3>Task Board</h3>
-
-<Button_2 OnClick="LoadDataAsync" Type="primary">Load Tasks</Button_2>
-<Button_2 OnClick="SaveDataAsync" Type="primary">Save Tasks</Button_2>
-
+<div class="d-grid gap-2 d-md-flex justify-content-md-end mt-2">
+    <Button @onclick="() => SaveDataAsync()"  Color="ButtonColor.Success">Save Tasks</Button>
+    <Button @onclick="() => LoadDataAsync()"  Color="ButtonColor.Warning">Load Tasks</Button>
+</div>
 <!-- Kanban board -->
 <div class="task-list-container">
     @foreach (var taskList in GetTaskLists())
@@ -27,7 +27,7 @@
         }
         else
         {
-            <Button_2 OnClick="ShowAddTaskListInput" Type="primary">+ Přidat seznam</Button_2>
+            <Button @onclick="ShowAddTaskListInput" Color="ButtonColor.Primary">+ Přidat seznam</Button>
         }
     </div>
 </div>

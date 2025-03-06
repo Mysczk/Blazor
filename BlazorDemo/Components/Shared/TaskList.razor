@@ -20,7 +20,7 @@
         {
             <h4 @ondblclick="StartEditing">@taskListModel.Name</h4>
         }
-        <Button_2 OnClick="() => OnRemoveTaskList.InvokeAsync(taskListModel.Name)" Type="danger">❌</Button_2>
+        <Button @onclick="() => OnRemoveTaskList.InvokeAsync(taskListModel.Name)" Color="ButtonColor.Danger">X</Button>
     </div>
 
     <div class="task-list">
@@ -38,7 +38,7 @@
         }
         else
         {
-            <Button_2 OnClick="ShowAddTaskListInput" Type="primary">+ Přidat úkol</Button_2>
+            <Button @onclick="ShowAddTaskListInput" Color="ButtonColor.Primary">+ Přidat úkol</Button>
         }
     </div>
 </div>

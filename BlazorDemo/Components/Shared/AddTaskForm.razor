@@ -1,6 +1,6 @@
 <div class="add-task-form">
     <input @bind="newTaskText" placeholder="Zadejte název úkolu" @bind:event="oninput" @onkeypress="HandleKeyPress" />
-    <Button_2 OnClick="SubmitTask" Type="secondary">Přidat úkol</Button_2>
+    <Button @onclick="SubmitTask" Color="ButtonColor.Primary">Přidat úkol</Button>
     <p class="error">@errorMessage</p>
 </div>
 

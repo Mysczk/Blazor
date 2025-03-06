@@ -5,22 +5,23 @@ namespace BlazorDemo.Services
 {
     public class TaskService
     {
-        private List<TaskListModel> taskLists = new List<TaskListModel>();
+        private List<TaskListModel> taskLists = new List<TaskListModel>(); // List všech seznamů úkolů
         private readonly string _filePath = "Data/tasks.json"; // Cesta k souboru pro ukládání dat
 
-        public TaskListModel DefaultTaskList { get; private set; }
+        public TaskListModel DefaultTaskList { get; private set; } // Výchozí seznam úkolů
         public TaskService()
         {
 
             // Pokud neexistuje žádný seznam úkolů, vytvořte výchozí seznam
             if (!taskLists.Any())
             {
-                DefaultTaskList = new TaskListModel { Name = "ToDo" };
-                taskLists.Add(DefaultTaskList);
+                DefaultTaskList = new TaskListModel { Name = "ToDo" }; // Vytvoření výchozího seznamu úkolů
+                taskLists.Add(DefaultTaskList);      // Přidání výchozího seznamu do seznamu úkolů
             }
             else
             {
-                DefaultTaskList = taskLists.FirstOrDefault(tl => tl.Name == "ToDo") ?? taskLists.First();
+                // Nastavení výchozího seznamu úkolů pokud již existuje
+                DefaultTaskList = taskLists.FirstOrDefault(tl => tl.Name == "ToDo") ?? taskLists.First(); 
             }
         }
 
@@ -34,18 +35,15 @@ namespace BlazorDemo.Services
         public void AddTaskList(string name)
         {
             taskLists.Add(new TaskListModel { Name = name });
-          //  SaveTasksAsync().Wait(); // Uložte data po přidání seznamu
         }
 
         // Metoda pro přidání úkolu do seznamu
         public void AddTask(string taskListName, string taskText)
         {
-            Console.WriteLine("AddTask in TaskService");
             var taskList = taskLists.FirstOrDefault(tl => tl.Name == taskListName);
             if (taskList != null)
             {
                 taskList.Tasks.Add(new TaskModel { Text = taskText });
-            //    SaveTasksAsync().Wait(); // Uložte data po přidání úkolu
             }
         }
 
@@ -56,13 +54,12 @@ namespace BlazorDemo.Services
 
             if (sourceTaskList != null)
             {
+                sourceTaskList.Tasks.Remove(task);
                 var targetTaskList = taskLists.FirstOrDefault(tl => tl.Name == targetTaskListName);
                 if (targetTaskList != null)
                 {
-                    sourceTaskList.Tasks.Remove(task);
                     targetTaskList.Tasks.Add(task);
                     task.TaskListName = targetTaskListName;
-                //    SaveTasksAsync().Wait(); // Uložte data po přesunutí úkolu
                 }
             }
         }
@@ -74,7 +71,6 @@ namespace BlazorDemo.Services
             if (taskList != null)
             {
                 taskLists.Remove(taskList);
-           //     SaveTasksAsync().Wait(); // Uložte data po smazání seznamu
             }
         }
 
@@ -94,7 +90,6 @@ namespace BlazorDemo.Services
             if (existingTaskList != null)
             {
                 existingTaskList.Name = updatedTaskList.Name;
-          //      SaveTasksAsync().Wait(); // Uložte data po aktualizaci názvu
             }
         }
 
@@ -105,7 +100,6 @@ namespace BlazorDemo.Services
             if (taskList != null)
             {
                 taskList.Tasks.Remove(task);
-             //   SaveTasksAsync().Wait(); // Uložte data po smazání úkolu
             }
         }
 

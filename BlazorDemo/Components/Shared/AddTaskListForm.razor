@@ -1,6 +1,6 @@
 <div class="add-task-form">
     <input @bind="newTaskListName" placeholder="Zadejte název seznamu" @bind:event="oninput" @onkeypress="HandleKeyPress" />
-    <Button_2 OnClick="AddTaskList" Type="secondary">Přidat seznam</Button_2>
+    <Button @onclick="AddTaskList" Color="ButtonColor.Primary">Přidat seznam</Button>
 
     @if (!string.IsNullOrEmpty(errorMessage))
     {
