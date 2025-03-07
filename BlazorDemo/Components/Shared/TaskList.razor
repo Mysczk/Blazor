@@ -53,8 +53,6 @@
     public List<TaskListModel> TaskLists { get; set; } = new();
 
     [Parameter]
-    public EventCallback<TaskListModel> OnRenameTaskList { get; set; }
-    [Parameter]
     public EventCallback<(TaskModel task, string targetTaskListName)> OnMoveTask { get; set; }
 
     [Parameter]
@@ -84,37 +82,34 @@
         showAddTaskListInput = false;
     }
 
-    private async Task SaveTaskListName()
+    private void SaveTaskListName()
     {
-        if (string.IsNullOrWhiteSpace(taskListModel.Name))
+        try 
         {
-            errorMessage = "Název task listu nemůže být prázdný.";
-            return;
-        }
-
-        try
-        {
-            await OnRenameTaskList.InvokeAsync(taskListModel);
+            TaskService.UpdateTaskListName(taskListModel);
             isEditing = false;
             errorMessage = null; // Resetujeme chybu, pokud vše proběhlo ok
         }
-        catch (Exception ex)
-        {
-            errorMessage = ex.Message; // Uložíme text chyby pro zobrazení
+        catch (ArgumentException ex) {
+            errorMessage = ex.Message;
+        }
+        catch (InvalidOperationException ex) {
+            errorMessage = ex.Message;
         }
     }
 
-    private async Task HandleKeyPress(KeyboardEventArgs e)
+    private void HandleKeyPress(KeyboardEventArgs e)
     {
         if (e.Key == "Enter")
         {
-            await SaveTaskListName();
+            SaveTaskListName();
         }
     }
 
     private void RemoveTask(TaskModel task)
     {
-        taskListModel.Tasks.Remove(task);
+        //taskListModel.Tasks.Remove(task);
+        TaskService.RemoveTask(taskListModel, task);
     }
 
     private void ShowDetails(TaskModel task) => selectedTask = task;
