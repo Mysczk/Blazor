@@ -1,0 +1,25 @@
+[
+  {
+    "Name": "ToDo",
+    "Tasks": [
+      {
+        "Text": "asas",
+        "TaskListName": "ToDo",
+        "Description": "Write your own description",
+        "DueDate": "2025-03-05T20:54:19.8862014+01:00"
+      }
+    ]
+  },
+  {
+    "Name": "In",
+    "Tasks": []
+  },
+  {
+    "Name": "In review",
+    "Tasks": []
+  },
+  {
+    "Name": "Done",
+    "Tasks": []
+  }
+]

@@ -1,3 +1,5 @@
+@inject TaskService TaskService
+
 <div class="kanban-column">
     @if (!string.IsNullOrEmpty(errorMessage))
     {
@@ -18,13 +20,25 @@
         {
             <h4 @ondblclick="StartEditing">@taskListModel.Name</h4>
         }
-        <Button_2 OnClick="() => OnRemoveTaskList.InvokeAsync(taskListModel)" Type="danger">❌</Button_2>
+        <Button @onclick="() => OnRemoveTaskList.InvokeAsync(taskListModel.Name)" Color="ButtonColor.Danger">X</Button>
     </div>
 
     <div class="task-list">
         @foreach (var task in taskListModel.Tasks)
         {
             <TaskItem Task="task" OnTaskSelected="ShowDetails" />
+        }
+    </div>
+
+    <!-- Přidání nového úkolu -->
+    <div style="text-align: center;">
+        @if (showAddTaskListInput)
+        {
+            <AddTaskForm OnTaskAdded="AddTask"/>
+        }
+        else
+        {
+            <Button @onclick="ShowAddTaskListInput" Color="ButtonColor.Primary">+ Přidat úkol</Button>
         }
     </div>
 </div>
@@ -39,16 +53,17 @@
     public List<TaskListModel> TaskLists { get; set; } = new();
 
     [Parameter]
-    public EventCallback<TaskListModel> OnRenameTaskList { get; set; }
-    [Parameter]
-    public EventCallback<(TaskModel task, TaskListModel newTaskList)> OnMoveTask { get; set; }
+    public EventCallback<(TaskModel task, string targetTaskListName)> OnMoveTask { get; set; }
 
     [Parameter]
-    public EventCallback<TaskListModel> OnRemoveTaskList { get; set; }
+    public EventCallback<string> OnRemoveTaskList { get; set; }
 
     private bool isEditing = false;
     private ElementReference taskListInput;
     private string? errorMessage;
+    private bool showAddTaskListInput = false;
+
+    private TaskModel? selectedTask = null;
 
     private async Task StartEditing()
     {
@@ -57,41 +72,52 @@
         await taskListInput.FocusAsync();
     }
 
-    private async Task SaveTaskListName()
+    private void ShowAddTaskListInput()
     {
-        if (string.IsNullOrWhiteSpace(taskListModel.Name))
-        {
-            errorMessage = "Název task listu nemůže být prázdný.";
-            return;
-        }
+        showAddTaskListInput = true;
+    }
 
-        try
+    private void HideAddTaskListInput()
+    {
+        showAddTaskListInput = false;
+    }
+
+    private void SaveTaskListName()
+    {
+        try 
         {
-            await OnRenameTaskList.InvokeAsync(taskListModel);
+            TaskService.UpdateTaskListName(taskListModel);
             isEditing = false;
             errorMessage = null; // Resetujeme chybu, pokud vše proběhlo ok
         }
-        catch (Exception ex)
-        {
-            errorMessage = ex.Message; // Uložíme text chyby pro zobrazení
+        catch (ArgumentException ex) {
+            errorMessage = ex.Message;
+        }
+        catch (InvalidOperationException ex) {
+            errorMessage = ex.Message;
         }
     }
 
-    private async Task HandleKeyPress(KeyboardEventArgs e)
+    private void HandleKeyPress(KeyboardEventArgs e)
     {
         if (e.Key == "Enter")
         {
-            await SaveTaskListName();
+            SaveTaskListName();
         }
     }
 
     private void RemoveTask(TaskModel task)
     {
-        taskListModel.Tasks.Remove(task);
+        //taskListModel.Tasks.Remove(task);
+        TaskService.RemoveTask(taskListModel, task);
     }
-
-    private TaskModel? selectedTask = null;
 
     private void ShowDetails(TaskModel task) => selectedTask = task;
     private void CloseDetails() => selectedTask = null;
+
+    private void AddTask(string newTaskText)
+    {
+        TaskService.AddTask(taskListModel.Name, newTaskText);
+        HideAddTaskListInput();
+    }
 }
