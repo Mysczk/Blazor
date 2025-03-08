@@ -1,0 +1,170 @@
+@inject ImageService ImageService
+
+@code {
+    private List<string> images = new List<string>();
+    private int selectedIndex = -1;
+    private ElementReference overlayElement;
+
+    protected override async Task OnInitializedAsync()
+    {
+        images = await ImageService.GetImagePathsAsync();
+    }
+
+    private async Task OpenImage(int index)
+    {
+        selectedIndex = index;
+        StateHasChanged();
+        await FocusOverlay();
+    }
+
+    private async Task FocusOverlay()
+    {
+        if (selectedIndex != -1)
+        {
+            await Task.Delay(50);
+            await overlayElement.FocusAsync();
+        }
+    }
+    private void CloseImage()
+    {
+        selectedIndex = -1;
+    }
+
+    private void PreviousImage()
+    {
+        if (selectedIndex > 0)
+        {
+            selectedIndex--;
+            StateHasChanged();
+        }
+        else
+        {
+            selectedIndex = images.Count - 1;
+            StateHasChanged();
+        }
+    }
+
+    private void NextImage()
+    {
+        if (selectedIndex < images.Count - 1)
+        {
+            selectedIndex++;
+            StateHasChanged();
+        }
+        else
+        {
+            selectedIndex = 0;
+            StateHasChanged();
+        }
+    }
+
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (selectedIndex != -1)
+        {
+            if (e.Key == "ArrowLeft")
+            {
+                PreviousImage();
+            }
+            else if (e.Key == "ArrowRight")
+            {
+                NextImage();
+            }
+            else if (e.Key == "Escape")
+            {
+                CloseImage();
+            }
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+}
+
+@if (images.Count == 0)
+{
+    <p>Žádné obrázky nejsou k dispozici.</p>
+}
+else
+{
+    <div class="gallery">
+        @foreach (var img in images.Select((path, index) => new { path, index }))
+        {
+            <img src="@img.path" @onclick="() => OpenImage(img.index)" />
+        }
+    </div>
+}
+
+@if (selectedIndex != -1)
+{
+    <div class="overlay" tabindex="0" @onkeydown="HandleKeyDown" @ref="overlayElement">
+        <button class="nav-btn left" @onclick="PreviousImage">&#9665;</button>
+
+        <img src="@images[selectedIndex]" @onclick="CloseImage" />
+
+        <button class="nav-btn right" @onclick="NextImage">&#9655;</button>
+    </div>
+}
+
+<style>
+    .gallery {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 10px;
+        padding: 10px;
+    }
+
+    .gallery img {
+        width: 100%;
+        height: auto;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: transform 0.2s ease-in-out;
+    }
+
+    .gallery img:hover {
+        transform: scale(1.05);
+    }
+
+    .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .overlay img {
+        max-width: 80%;
+        max-height: 80%;
+        border-radius: 10px;
+    }
+
+    /* Styl pro navigační tlačítka */
+    .nav-btn {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(255, 255, 255, 0.5);
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        padding: 10px;
+        border-radius: 50%;
+    }
+
+    .nav-btn.left {
+        left: 20px;
+    }
+
+    .nav-btn.right {
+        right: 20px;
+    }
+
+    .nav-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+</style>
