@@ -3,30 +3,42 @@
 
 <PageTitle>Task Board</PageTitle>
 
-<h3>Task Board</h3>
-<div class="d-grid gap-2 d-md-flex justify-content-md-end mt-2">
-    <Button @onclick="() => SaveDataAsync()"  Color="ButtonColor.Success">Save Tasks</Button>
-    <Button @onclick="() => LoadDataAsync()"  Color="ButtonColor.Warning">Load Tasks</Button>
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <h3 class="mb-0">Task Board</h3>
+    <div class="d-flex gap-2">
+        <Button @onclick="() => SaveDataAsync()" Color="ButtonColor.Success">
+            <Icon Name="IconName.Save" /> Save Tasks
+        </Button>
+        <Button @onclick="() => LoadDataAsync()" Color="ButtonColor.Warning">
+            <Icon Name="IconName.Upload" /> Load Tasks
+        </Button>
+    </div>
 </div>
+
 <!-- Kanban board -->
 <div class="task-list-container">
     @foreach (var taskList in GetTaskLists())
     {
         <TaskList taskListModel="taskList"
-                TaskLists="@GetTaskLists()"
-                OnMoveTask="HandleMoveTask"
-                OnRemoveTaskList="RemoveTaskList" />
+                 TaskLists="@GetTaskLists()"
+                 OnMoveTask="HandleMoveTask"
+                 OnRemoveTaskList="RemoveTaskList" />
     }
 
-    <!-- Přidání nového TaskListu -->
-    <div class="kanban-column add-task-list-column">
+    <!-- Add new TaskList column -->
+    <div class="add-task-list-column">
         @if (showAddTaskListInput)
         {
             <AddTaskListForm OnTaskListAdded="HandleTaskListAdded" ExistingTaskLists="@GetTaskLists()" />
         }
         else
         {
-            <Button @onclick="ShowAddTaskListInput" Color="ButtonColor.Primary">+ Přidat seznam</Button>
+            <Button @onclick="ShowAddTaskListInput" 
+                    Color="ButtonColor.Primary" 
+                    Size="ButtonSize.Medium"
+                    Class="w-100 d-flex align-items-center justify-content-center">
+                <Icon Name="IconName.Plus" Class="me-2" /> Přidat seznam
+            </Button>
         }
     </div>
 </div>
@@ -72,6 +84,4 @@
     {
         await TaskService.SaveTasksAsync();
     }
-
-   
 }

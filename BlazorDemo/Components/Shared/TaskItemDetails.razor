@@ -3,7 +3,7 @@
     <div class="task-details-sidebar">
         <div class="sidebar-header mb-3 d-flex justify-content-between align-items-center">
             <h4 class="m-0">Task Details</h4>
-            <Button Color="ButtonColor.Light" Class="rounded-circle" @onclick="Close">
+            <Button Color="ButtonColor.Light" Class="rounded-circle" Size="ButtonSize.Small" @onclick="Close">
                 <i class="bi bi-x-lg"></i>
             </Button>
         </div>
@@ -58,7 +58,7 @@
                                 <option value="@taskList.Name">@taskList.Name</option>
                             }
                         </select>
-                        <Button @onclick="MoveTask" Color="ButtonColor.Primary">
+                        <Button @onclick="MoveTask" Color="ButtonColor.Primary" Size="ButtonSize.Small">
                             <i class="bi bi-arrow-right-square me-1"></i> Move
                         </Button>
                     </div>

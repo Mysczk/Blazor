@@ -1,7 +1,10 @@
 <div class="add-task-form">
     <input @bind="newTaskText" placeholder="Zadejte název úkolu" @bind:event="oninput" @onkeypress="HandleKeyPress" />
     <Button @onclick="SubmitTask" Color="ButtonColor.Primary">Přidat úkol</Button>
-    <p class="error">@errorMessage</p>
+    @if (!string.IsNullOrWhiteSpace(errorMessage))
+    {
+       <div class="error">@errorMessage</div>
+    }
 </div>
 
 @code {

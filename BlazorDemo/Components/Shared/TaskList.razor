@@ -1,10 +1,6 @@
 @inject TaskService TaskService
 
 <div class="kanban-column">
-    @if (!string.IsNullOrEmpty(errorMessage))
-    {
-        <p class="error">@errorMessage</p>
-    }
     <div class="kanban-column-header">
         @if (isEditing)
         {
@@ -20,8 +16,17 @@
         {
             <h4 @ondblclick="StartEditing">@taskListModel.Name</h4>
         }
-        <Button @onclick="() => OnRemoveTaskList.InvokeAsync(taskListModel.Name)" Color="ButtonColor.Danger">X</Button>
+        <Button @onclick="() => OnRemoveTaskList.InvokeAsync(taskListModel.Name)" 
+                Color="ButtonColor.Danger" 
+                Size="ButtonSize.Small">
+            <Icon Name="IconName.X" />
+        </Button>
     </div>
+
+    @if (!string.IsNullOrWhiteSpace(errorMessage))
+    {
+       <div class="error">@errorMessage</div>
+    }
 
     <div class="task-list">
         @foreach (var task in taskListModel.Tasks)
@@ -31,14 +36,19 @@
     </div>
 
     <!-- Přidání nového úkolu -->
-    <div style="text-align: center;">
+    <div class="task-add-area">
         @if (showAddTaskListInput)
         {
             <AddTaskForm OnTaskAdded="AddTask"/>
         }
         else
         {
-            <Button @onclick="ShowAddTaskListInput" Color="ButtonColor.Primary">+ Přidat úkol</Button>
+            <Button @onclick="ShowAddTaskListInput" 
+                    Color="ButtonColor.Primary" 
+                    Size="ButtonSize.Small"
+                    Class="btn-add-task">
+                <Icon Name="IconName.Plus" /> Přidat úkol
+            </Button>
         }
     </div>
 </div>
@@ -60,7 +70,7 @@
 
     private bool isEditing = false;
     private ElementReference taskListInput;
-    private string? errorMessage;
+    private string errorMessage = string.Empty;
     private bool showAddTaskListInput = false;
 
     private TaskModel? selectedTask = null;
@@ -88,7 +98,7 @@
         {
             TaskService.UpdateTaskListName(taskListModel);
             isEditing = false;
-            errorMessage = null; // Resetujeme chybu, pokud vše proběhlo ok
+            errorMessage = string.Empty; // Resetujeme chybu, pokud vše proběhlo ok
         }
         catch (ArgumentException ex) {
             errorMessage = ex.Message;
@@ -108,7 +118,6 @@
 
     private void RemoveTask(TaskModel task)
     {
-        //taskListModel.Tasks.Remove(task);
         TaskService.RemoveTask(taskListModel, task);
     }
 
