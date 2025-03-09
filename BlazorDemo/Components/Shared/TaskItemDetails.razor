@@ -1,30 +1,81 @@
 @if (Task != null)
 {
     <div class="task-details-sidebar">
-        <Button @onclick="Close" Color="ButtonColor.Danger">X</Button>
-        <Button @onclick="ToggleEditMode" Color="ButtonColor.Primary">@editModeText</Button>
+        <div class="sidebar-header mb-3 d-flex justify-content-between align-items-center">
+            <h4 class="m-0">Task Details</h4>
+            <Button Color="ButtonColor.Light" Class="rounded-circle" @onclick="Close">
+                <i class="bi bi-x-lg"></i>
+            </Button>
+        </div>
 
-        @if (isEditing)
-        {
-            <input @bind="Task.Text" class="task-name-input" />
-            <textarea @bind="Task.Description" class="task-description-input"></textarea>
-            <input type="date" @bind="Task.DueDate" class="task-due-date-input" />
-        }
-        else
-        {
-            <h3>@Task.Text</h3>
-            <p>@Task.Description</p>
-            <p>Due Date: @Task.DueDate.ToString("yyyy-MM-dd")</p>
-        }
-
-        <select @bind="selectedTaskListName">
-            @foreach (var taskList in TaskLists)
+        <div class="sidebar-content">
+            @if (isEditing)
             {
-                <option value="@taskList.Name">@taskList.Name</option>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Task Name</label>
+                    <input @bind="Task.Text" class="form-control" placeholder="Enter task name" />
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Description</label>
+                    <textarea @bind="Task.Description" class="form-control" rows="4" placeholder="Enter task description"></textarea>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Due Date</label>
+                    <input type="date" @bind="Task.DueDate" class="form-control" />
+                </div>
             }
-        </select>
-        <Button @onclick="MoveTask" Color="ButtonColor.Primary">Move</Button>
-        <Button @onclick="RemoveTask" Color="ButtonColor.Danger">Remove</Button>
+            else
+            {
+                <div class="mb-3">
+                    <Badge Color="BadgeColor.Primary" Class="mb-2">@Task.TaskListName</Badge>
+                    <h3 class="mb-2">@Task.Text</h3>
+                    <div class="task-due-date mb-3">
+                        <i class="bi bi-calendar me-1"></i>
+                        <span class="@GetDueDateClass()">Due: @Task.DueDate.ToString("MMM dd, yyyy")</span>
+                    </div>
+                    <div class="task-description p-3 bg-light rounded">
+                        @if (!string.IsNullOrWhiteSpace(Task.Description))
+                        {
+                            <p class="mb-0">@Task.Description</p>
+                        }
+                        else
+                        {
+                            <p class="text-muted mb-0 fst-italic">No description provided</p>
+                        }
+                    </div>
+                </div>
+            }
+
+            <div class="task-actions mt-4">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Move to List</label>
+                    <div class="d-flex gap-2">
+                        <select @bind="selectedTaskListName" class="form-select">
+                            @foreach (var taskList in TaskLists)
+                            {
+                                <option value="@taskList.Name">@taskList.Name</option>
+                            }
+                        </select>
+                        <Button @onclick="MoveTask" Color="ButtonColor.Primary">
+                            <i class="bi bi-arrow-right-square me-1"></i> Move
+                        </Button>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <Button @onclick="ToggleEditMode" Color="ButtonColor.Secondary">
+                        <i class="bi bi-@(isEditing ? "check-lg" : "pencil")"></i>
+                        @editModeText
+                    </Button>
+                    <Button @onclick="RemoveTask" Color="ButtonColor.Danger">
+                        <i class="bi bi-trash me-1"></i>
+                        Remove
+                    </Button>
+                </div>
+            </div>
+        </div>
     </div>
 }
 
@@ -58,7 +109,6 @@
     {
         isEditing = !isEditing;
         editModeText = isEditing ? "Save" : "Edit";
-
     }
 
     private async Task MoveTask()
@@ -74,5 +124,18 @@
             await OnRemove.InvokeAsync(Task);
             Close();
         }
+    }
+    
+    private string GetDueDateClass()
+    {
+        if (Task.DueDate < DateTime.Today)
+        {
+            return "text-danger fw-bold";
+        }
+        else if (Task.DueDate == DateTime.Today)
+        {
+            return "text-warning fw-bold";
+        }
+        return "text-muted";
     }
 }

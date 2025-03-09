@@ -130,33 +130,41 @@ h1:focus {
     position: fixed;
     right: 0;
     top: 0;
-    width: 300px;
+    width: 350px;
     height: 100vh;
     background: white;
-    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.2);
+    box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
     padding: 20px;
     overflow-y: auto;
-    z-index: 1000; /* Ensure it appears above other content */
+    z-index: 1000;
+    border-left: 1px solid #e9ecef;
+    transition: transform 0.3s ease;
 }
 
-.task-name-input {
-    width: 100%;
-    padding: 8px;
-    margin-bottom: 10px;
-    font-size: 1.2em;
+.sidebar-header {
+    border-bottom: 1px solid #e9ecef;
+    padding-bottom: 10px;
 }
 
-.task-description-input {
-    width: 100%;
-    height: 100px;
-    padding: 8px;
-    margin-bottom: 10px;
+.sidebar-content {
+    padding-top: 10px;
 }
 
-.task-due-date-input {
-    width: 100%;
-    padding: 8px;
-    margin-bottom: 10px;
+.task-description {
+    border-left: 3px solid #007bff;
+    min-height: 80px;
+}
+
+.task-due-date {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .task-details-sidebar {
+        width: 100%;
+    }
 }
 
 /* ==================== */
