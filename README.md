@@ -422,12 +422,8 @@ Vytvoř Blazor stránku, která umožní:
         private string? path;
 
 
-        // Method used to load images from given path
-        // Incomplete: No way to give new path
-        // Future: Path.Combine
         protected override async Task OnInitializedAsync()
         {
-            // Default path to images
             if (path == null)
             {
                 images = await ImageService.GetImagePathsAsync("wwwroot/images/gallery");
@@ -438,7 +434,6 @@ Vytvoř Blazor stránku, která umožní:
             }
         }
 
-        // Method that opens image to preview overlay
         private async Task OpenImage(int index)
         {
             selectedIndex = index;
@@ -446,7 +441,6 @@ Vytvoř Blazor stránku, která umožní:
             await FocusOverlay();
         }
 
-        // Method that focuses overlay for key control
         private async Task FocusOverlay()
         {
             if (selectedIndex != -1)
@@ -456,12 +450,11 @@ Vytvoř Blazor stránku, která umožní:
             }
         }
 
-        // Method closing image overlay
         private void CloseImage()
         {
             selectedIndex = -1;
         }
-        // Method giving previous image in overlay
+
         private void PreviousImage()
         {
             if (selectedIndex > 0)
@@ -476,7 +469,6 @@ Vytvoř Blazor stránku, která umožní:
             }
         }
 
-        // Method giving next image in overlay
         private void NextImage()
         {
             if (selectedIndex < images.Count - 1)
@@ -491,7 +483,6 @@ Vytvoř Blazor stránku, která umožní:
             }
         }
 
-        // Method handling keyboard inputs
         private async Task HandleKeyDown(KeyboardEventArgs e)
         {
             if (selectedIndex != -1)
@@ -514,6 +505,7 @@ Vytvoř Blazor stránku, která umožní:
     }
     ```
     </details>
+
     ## Kód je zde trochu delší, ale pojďme si ho rozklíčovat:
 
     ### `OnInitializedAsync`
@@ -547,13 +539,12 @@ Vytvoř Blazor stránku, která umožní:
     ```csharp
     @if (images.Count == 0)
     {
-        <p>Žádné obrázky nejsou k dispozici.</p> // No images to load
+        <p>Žádné obrázky nejsou k dispozici.</p>
     }
     else
     {
-        <!-- Gallery structure --> 
         <div class="gallery">
-            @foreach (var img in images.Select((path, index) => new { path, index })) // LINQ query for image path and its index
+            @foreach (var img in images.Select((path, index) => new { path, index })) 
             {
                 <div class="gallery-item">
                     <img src="@img.path" @onclick="() => OpenImage(img.index)" /> <!-- Creation of individual image and assigning open method -->
@@ -561,7 +552,7 @@ Vytvoř Blazor stránku, která umožní:
             }
         </div>
     }
-    <!-- Overlay structure -->
+
     @if (selectedIndex != -1)
     {
         <div class="gal-overlay" tabindex="0" @onkeydown="HandleKeyDown" @ref="overlayElement">
@@ -647,7 +638,6 @@ Vytvoř Blazor stránku, která umožní:
             border-radius: 10px;
         }
 
-        /* Styl pro navigační tlačítka */
         .gal-nav-btn {
             position: absolute;
             top: 50%;
@@ -682,14 +672,13 @@ Vytvoř Blazor stránku, která umožní:
 
         public class ImageService
         {
-            // Method for finding images in given folder
             public Task<List<string>> GetImagePathsAsync(string path)
             {
                 var images = new List<string>();
 
                 if (Directory.Exists(path))
                 {
-                    var files = Directory.GetFiles(path, "*.jpg"); // Filtering .jpg Optimization: more formats
+                    var files = Directory.GetFiles(path, "*.jpg"); 
                     foreach (var file in files)
                     {
                         images.Add($"images/gallery/{Path.GetFileName(file)}");
