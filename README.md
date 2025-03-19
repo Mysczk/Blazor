@@ -197,345 +197,184 @@ sequenceDiagram
 
 # Cvičení 1: Jednoduchý poznámkový blok
 
-### Zadání
-Vytvoř novou Blazor stránku, která umožní uživateli:
-1. **Přidat** novou poznámku.
-2. **Smazat** existující poznámku.
-3. **Upravit** existující poznámku.
+### Řešení
 
+#### Popis
+ - Tato Blazor komponenta implementuje jednoduchý poznámkový blok, kde uživatel může přidávat, upravovat a mazat poznámky.
 
-<details>
-  <summary>💡 Nápověda</summary>
+---
 
-- Použij **`@bind`** k obousměrnému svázání vstupu.
-- Ulož poznámky do **`List<string>`** a vykresli je pomocí **`@foreach`**.
+### Kód komponenty `Notepad.razor`
 
-</details>
-
-# Cvičení 2: Galerie obrázků
-Vytvoř Blazor stránku, která umožní:
-1. **Načíst** obrázky
-2. **Vykreslit** obrázky
-3. **Prohlédnout** konkrétní obrázek
-4. **Klávesové** ovládání prohlížení obrázků
-5. **Subúkol**: mansory rozložení pomocí Blazoru a čistého CSS
-
-
-<details>
-  <summary>💡 Nápověda</summary>
-
-- Obrázky načítej pomocí **Service** a vykresluj pomocí cyklu v **HTML** značkách
-- Pro otevření obrázku vytvoř overlay přes existující galerii
-- pro klávesové ovládání budeš potřebovat registrovat vstupy z klávesnice pomocí **`KeyboardEventArgs`**
-</details>
-
-<details>
-  <summary>Část řešení</summary>
-
-1. Vytvoříme si razor stránku, kde budeme naší galerii volat
 ```razor
-@page "/gallery"
+@page "/notepad"
+<PageTitle>Poznámkový blok</PageTitle>
+<h3>Poznámkový blok</h3>
 
-<h3>Galerie</h3>
+<div class="mb-3">
+    <TextAreaInput @bind-Value="newNoteText" Rows="3" MaxLength="350" Placeholder="Zadejte poznámku..."/>
+</div>
+<Button @onclick="AddNote" Color="ButtonColor.Primary" class="mt-2">Přidat</Button>
 
-<ImageGrid />
-```
-
-2. Vytvoříme komponentu `ImageGrid.razor`
-    - název je volitelný, ale potřeba upravit i v předešlém kroku
-
-    <details>
-        <summary>Kód</summary>
-
-    ```csharp
-    @code {
-        private List<string> images = new List<string>();
-        private int selectedIndex = -1;
-        private ElementReference overlayElement;
-        private string? path;
-
-
-        protected override async Task OnInitializedAsync()
-        {
-            if (path == null)
+<div class="mb-3"></div>
+<ul class="list-group">
+    @foreach (var note in Notes)
+    {
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            @if (note.IsEditing)
             {
-                images = await ImageService.GetImagePathsAsync("wwwroot/images/gallery");
-            }
-            else 
-            { 
-                images = await ImageService.GetImagePathsAsync(path);
-            }
-        }
-
-        private async Task OpenImage(int index)
-        {
-            selectedIndex = index;
-            StateHasChanged();
-            await FocusOverlay();
-        }
-
-        private async Task FocusOverlay()
-        {
-            if (selectedIndex != -1)
-            {
-                await Task.Delay(50);
-                await overlayElement.FocusAsync();
-            }
-        }
-
-        private void CloseImage()
-        {
-            selectedIndex = -1;
-        }
-
-        private void PreviousImage()
-        {
-            if (selectedIndex > 0)
-            {
-                selectedIndex--;
-                StateHasChanged();
+                <TextInput @bind-Value="note.Text" class="form-control me-2" />
+                <Button @onclick="() => SaveEdit(note)" Color="ButtonColor.Success" class="me-2">Uložit</Button>
             }
             else
             {
-                selectedIndex = images.Count - 1;
-                StateHasChanged();
-            }
-        }
-
-        private void NextImage()
-        {
-            if (selectedIndex < images.Count - 1)
-            {
-                selectedIndex++;
-                StateHasChanged();
-            }
-            else
-            {
-                selectedIndex = 0;
-                StateHasChanged();
-            }
-        }
-
-        private async Task HandleKeyDown(KeyboardEventArgs e)
-        {
-            if (selectedIndex != -1)
-            {
-                if (e.Key == "ArrowLeft")
-                {
-                    PreviousImage();
-                }
-                else if (e.Key == "ArrowRight")
-                {
-                    NextImage();
-                }
-                else if (e.Key == "Escape")
-                {
-                    CloseImage();
-                }
-                await InvokeAsync(StateHasChanged);
-            }
-        }
-    }
-    ```
-    </details>
-    ## Kód je zde trochu delší, ale pojďme si ho rozklíčovat:
-
-    ### `OnInitializedAsync`
-    - Spouští se automaticky při inicializaci komponenty.
-
-    ### `OpenImage`
-    - Otevře náhled konkrétního obrázku.
-
-    ### `FocusOverlay`
-    - Zaostří overlay prvek kvůli ovládání klávesnicí.
-
-    ### `CloseImage`
-    - Zavře náhled obrázku (overlay).
-
-    ### `PreviousImage`
-    - Posune výběr na předchozí obrázek.
-
-    ### `NextImage`
-    - Posune výběr na další obrázek.
-
-    ### `HandleKeyDown`
-    - Zpracovává stisknuté klávesy při aktivním overlay.
-
-    ## Stále v naší komponentě udělejme strukturu stránky:
-
-
-    <details>
-        <summary>Kód</summary>
-
-
-    ```csharp
-    @if (images.Count == 0)
-    {
-        <p>Žádné obrázky nejsou k dispozici.</p>
-    }
-    else
-    {
-        <div class="gallery">
-            @foreach (var img in images.Select((path, index) => new { path, index }))
-            {
-                <div class="gallery-item">
-                    <img src="@img.path" @onclick="() => OpenImage(img.index)" />
+                <div class="note-text">
+                    @note.Text
+                </div>
+                <div>
+                    <Button @onclick="() => EditNote(note)" Color="ButtonColor.Warning" class="me-2">✏️</Button>
+                    <Button @onclick="() => RemoveNote(note)" Color="ButtonColor.Danger">🗑️</Button>
                 </div>
             }
-        </div>
+        </li>
     }
-    <!-- Overlay structure -->
-    @if (selectedIndex != -1)
+</ul>
+
+<style>
+    .note-text {
+        max-height: 100px; 
+        overflow: auto;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
+</style>
+
+@code {
+    private List<Note> Notes = new();
+    private string newNoteText = "";
+ 
+    private void AddNote()
     {
-        <div class="gal-overlay" tabindex="0" @onkeydown="HandleKeyDown" @ref="overlayElement">
-            <button class="gal-nav-btn left" @onclick="PreviousImage">&#9665;</button>
+        if (!string.IsNullOrWhiteSpace(newNoteText))
+        {
+            Notes.Add(new Note { Text = newNoteText });
+            newNoteText = "";
+        }
+    }
 
-            <img src="@images[selectedIndex]" @onclick="CloseImage" />
+    private void RemoveNote(Note note)
+    {
+        Notes.Remove(note);
+    }
 
-            <button class="gal-nav-btn right" @onclick="NextImage">&#9655;</button>
+    private void EditNote(Note note)
+    {
+        note.IsEditing = true;
+    }
+
+    private void SaveEdit(Note note)
+    {
+        note.IsEditing = false;
+    }
+
+    private class Note
+    {
+        public string Text { get; set; } = "";
+        public bool IsEditing { get; set; } = false;
+    }
+}
+```
+
+### Vysvětlení kódu
+
+#### 1. Třída `Note`
+
+Třída `Note` reprezentuje jednotlivou poznámku. Obsahuje 2 vlastnosti:
+ - `Text` (string) - obsah poznámky
+ - `IsEditing` (bool) - indikace, zda je v režimu úprav
+
+```csharp
+private class Note
+{
+    public string Text { get; set; } = "";
+    public bool IsEditing { get; set; } = false;
+}
+```
+
+#### 2. Seznam poznámek
+ - V komponentě se používá seznam `Notes`, který uchovává instance třídy `Note`.
+ - Tento seznam představuje hlavní datovou strukturu aplikace:
+
+```csharp
+private List<Note> Notes = new();
+```
+
+#### 3. Přidání poznámky
+
+ - Metoda AddNote vytvoří novou instanci třídy `Note`, pokud `newNoteText` není prázdný řetězec, a přidá ji do seznamu `Notes`:
+
+```csharp
+
+private void AddNote()
+{
+    if (!string.IsNullOrWhiteSpace(newNoteText))
+    {
+        Notes.Add(new Note { Text = newNoteText });
+        newNoteText = "";
+    }
+}
+```
+ 
+ - Tímto způsobem je každá poznámka uchovávána jako samostatný objekt v seznamu.
+
+#### 4. Odebírání poznámky
+
+ - Metoda `RemoveNote` odstraní konkrétní poznámku ze seznamu:
+
+```csharp
+private void RemoveNote(Note note)
+{
+    Notes.Remove(note);
+}
+```
+
+ - Při kliknutí na tlačítko 🗑️ dojde k odstranění odpovídající instance `Note` ze seznamu `Notes`.
+
+#### 5. Úprava poznámky
+
+ - Když uživatel klikne na tlačítko ✏️, metoda `EditNote` nastaví vlastnost `IsEditing` na `true`, čímž se aktivuje editační režim:
+
+```csharp
+private void EditNote(Note note)
+{
+    note.IsEditing = true;
+}
+```
+
+ - Tím se změní vykreslení prvku v seznamu a zobrazí se textové pole namísto statického textu:
+
+```razor
+ @if (note.IsEditing)
+    {
+        <TextInput @bind-Value="note.Text" class="form-control me-2" />
+        <Button @onclick="() => SaveEdit(note)" Color="ButtonColor.Success" class="me-2">Uložit</Button>
+    }
+else
+    {
+        <div class="note-text">
+            @note.Text
         </div>
     }
-    ``` 
-    </details>
+```
 
-    ## Stále v naší komponentě udělejme vzhled stránky:
+#### 6. Uložení upravené poznámky
 
+ - Metoda `SaveEdit` deaktivuje editační režim nastavením `IsEditing` na `false`, čímž se uložené změny zobrazí jako běžný text:
 
-    <details>
-        <summary>Kód</summary>
-
-    ```css
-    <style>
-        .gallery {
-            column-count: 5;
-            column-gap: 1rem;
-            padding: 1rem;
-        }
-        @@media (max-width: 1200px) {
-            .gallery {
-                column-count: 4;
-            }
-        }
-
-        @@media (max-width: 992px) {
-            .gallery {
-                column-count: 3;
-            }
-        }
-
-        @@media (max-width: 768px) {
-            .gallery {
-                column-count: 2;
-            }
-        
-        }
-
-        .gallery-item {
-            break-inside: avoid;
-            margin-bottom: 1rem;
-            background-color: #f8f8f8;
-            border-radius: 0.5rem;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .gallery-item img {
-            width: 100%;
-            display: block;
-        }
-
-        .gallery img {
-            transition: transform 0.2s;
-        }
-
-        .gallery img:hover {
-            transform: scale(1.05);
-        }
-
-        .gal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .gal-overlay img {
-            max-width: 80%;
-            max-height: 80%;
-            border-radius: 10px;
-        }
-
-        .gal-nav-btn {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            background: rgba(255, 255, 255, 0.5);
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            padding: 10px;
-            border-radius: 50%;
-        }
-
-        .gal-nav-btn.left {
-            left: 20px;
-        }
-
-        .gal-nav-btn.right {
-            right: 20px;
-        }
-    </style>
-    ```
-    </details>
-
-    ## Stránku máme téměř hotovu, ale nezapoměňme na obrázky:
-    - Založíme si ve složce `Services` službu `ImagesService.cs`
-
-    <details>
-        <summary>Kód</summary>
-
-
-    ```csharp
-
-        public class ImageService
-        {
-            // Method for finding images in given folder
-            public Task<List<string>> GetImagePathsAsync(string path)
-            {
-                var images = new List<string>();
-
-                if (Directory.Exists(path))
-                {
-                    var files = Directory.GetFiles(path, "*.jpg");
-                    foreach (var file in files)
-                    {
-                        images.Add($"images/gallery/{Path.GetFileName(file)}");
-                    }
-                }
-
-                return Task.FromResult(images);
-            }
-        }
-    ```
-    - Service najde všechny `.jpg` fotky v dané složce a ukládá jejich cesty do `List<string>`
-    </details>
-
-    ## Poslední 2 kroky
-    - Aby naše `Service` fungovala jak má je potřeba ji registrivat v `Program.cs` souboru a propojit ji s naší komponentou `ImageGrid.razor`
-    ### Registrace:
-    ```csharp
-    builder.Services.AddSingleton<ImageService>();
-    ```
-
-    ### Propojení:
-    - Na úplném vrcholu našeho souboru s komponentou použijeme:
-    ```blazor
-    @inject ImageService ImageService
-    ```
-    - To nám připojí instanci naší `Service` s naší komponentou 
-</details>
+```razor
+private void SaveEdit(Note note)
+{
+    note.IsEditing = false;
+}
+```
+---
