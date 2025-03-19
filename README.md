@@ -197,18 +197,184 @@ sequenceDiagram
 
 # Cvičení 1: Jednoduchý poznámkový blok
 
-### Zadání
-Vytvoř novou Blazor stránku, která umožní uživateli:
-1. **Přidat** novou poznámku.
-2. **Smazat** existující poznámku.
-3. **Upravit** existující poznámku.
+### Řešení
 
+#### Popis
+ - Tato Blazor komponenta implementuje jednoduchý poznámkový blok, kde uživatel může přidávat, upravovat a mazat poznámky.
 
-<details>
-  <summary>💡 Nápověda</summary>
+---
 
-- Použij **`@bind`** k obousměrnému svázání vstupu.
-- Ulož poznámky do **`List<string>`** a vykresli je pomocí **`@foreach`**.
+### Kód komponenty `Notepad.razor`
 
-</details>
+```razor
+@page "/notepad"
+<PageTitle>Poznámkový blok</PageTitle>
+<h3>Poznámkový blok</h3>
 
+<div class="mb-3">
+    <TextAreaInput @bind-Value="newNoteText" Rows="3" MaxLength="350" Placeholder="Zadejte poznámku..."/>
+</div>
+<Button @onclick="AddNote" Color="ButtonColor.Primary" class="mt-2">Přidat</Button>
+
+<div class="mb-3"></div>
+<ul class="list-group">
+    @foreach (var note in Notes)
+    {
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            @if (note.IsEditing)
+            {
+                <TextInput @bind-Value="note.Text" class="form-control me-2" />
+                <Button @onclick="() => SaveEdit(note)" Color="ButtonColor.Success" class="me-2">Uložit</Button>
+            }
+            else
+            {
+                <div class="note-text">
+                    @note.Text
+                </div>
+                <div>
+                    <Button @onclick="() => EditNote(note)" Color="ButtonColor.Warning" class="me-2">✏️</Button>
+                    <Button @onclick="() => RemoveNote(note)" Color="ButtonColor.Danger">🗑️</Button>
+                </div>
+            }
+        </li>
+    }
+</ul>
+
+<style>
+    .note-text {
+        max-height: 100px; 
+        overflow: auto;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
+</style>
+
+@code {
+    private List<Note> Notes = new();
+    private string newNoteText = "";
+ 
+    private void AddNote()
+    {
+        if (!string.IsNullOrWhiteSpace(newNoteText))
+        {
+            Notes.Add(new Note { Text = newNoteText });
+            newNoteText = "";
+        }
+    }
+
+    private void RemoveNote(Note note)
+    {
+        Notes.Remove(note);
+    }
+
+    private void EditNote(Note note)
+    {
+        note.IsEditing = true;
+    }
+
+    private void SaveEdit(Note note)
+    {
+        note.IsEditing = false;
+    }
+
+    private class Note
+    {
+        public string Text { get; set; } = "";
+        public bool IsEditing { get; set; } = false;
+    }
+}
+```
+
+### Vysvětlení kódu
+
+#### 1. Třída `Note`
+
+Třída `Note` reprezentuje jednotlivou poznámku. Obsahuje 2 vlastnosti:
+ - `Text` (string) - obsah poznámky
+ - `IsEditing` (bool) - indikace, zda je v režimu úprav
+
+```csharp
+private class Note
+{
+    public string Text { get; set; } = "";
+    public bool IsEditing { get; set; } = false;
+}
+```
+
+#### 2. Seznam poznámek
+ - V komponentě se používá seznam `Notes`, který uchovává instance třídy `Note`.
+ - Tento seznam představuje hlavní datovou strukturu aplikace:
+
+```csharp
+private List<Note> Notes = new();
+```
+
+#### 3. Přidání poznámky
+
+ - Metoda AddNote vytvoří novou instanci třídy `Note`, pokud `newNoteText` není prázdný řetězec, a přidá ji do seznamu `Notes`:
+
+```csharp
+
+private void AddNote()
+{
+    if (!string.IsNullOrWhiteSpace(newNoteText))
+    {
+        Notes.Add(new Note { Text = newNoteText });
+        newNoteText = "";
+    }
+}
+```
+ 
+ - Tímto způsobem je každá poznámka uchovávána jako samostatný objekt v seznamu.
+
+#### 4. Odebírání poznámky
+
+ - Metoda `RemoveNote` odstraní konkrétní poznámku ze seznamu:
+
+```csharp
+private void RemoveNote(Note note)
+{
+    Notes.Remove(note);
+}
+```
+
+ - Při kliknutí na tlačítko 🗑️ dojde k odstranění odpovídající instance `Note` ze seznamu `Notes`.
+
+#### 5. Úprava poznámky
+
+ - Když uživatel klikne na tlačítko ✏️, metoda `EditNote` nastaví vlastnost `IsEditing` na `true`, čímž se aktivuje editační režim:
+
+```csharp
+private void EditNote(Note note)
+{
+    note.IsEditing = true;
+}
+```
+
+ - Tím se změní vykreslení prvku v seznamu a zobrazí se textové pole namísto statického textu:
+
+```razor
+ @if (note.IsEditing)
+    {
+        <TextInput @bind-Value="note.Text" class="form-control me-2" />
+        <Button @onclick="() => SaveEdit(note)" Color="ButtonColor.Success" class="me-2">Uložit</Button>
+    }
+else
+    {
+        <div class="note-text">
+            @note.Text
+        </div>
+    }
+```
+
+#### 6. Uložení upravené poznámky
+
+ - Metoda `SaveEdit` deaktivuje editační režim nastavením `IsEditing` na `false`, čímž se uložené změny zobrazí jako běžný text:
+
+```razor
+private void SaveEdit(Note note)
+{
+    note.IsEditing = false;
+}
+```
+---
