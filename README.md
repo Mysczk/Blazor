@@ -16,6 +16,8 @@ Projekt pro předmět GUI zaměřený .NET Blazor
 * Technická specifika projektu
 ![Specifika projektu](docs/images/vscreatethree.png)
 
+---
+
 # Blazor TODO Aplikace
 
 Tato aplikace je jednoduchý **TODO seznam** vytvořený v Blazor Server. Umožňuje uživateli přidávat, upravovat, mazat a přesouvat úkoly mezi seznamy.
@@ -30,7 +32,9 @@ cd Blazor/BlazorDemo
 ```bash
 dotnet watch run
 ```
-3.Otevři v prohlížeči *http://localhost:5000*
+3. Otevři v prohlížeči *http://localhost:5000*
+
+---
 
 ## Funkcionalita
 - Přidání nového úkolu
@@ -40,62 +44,68 @@ dotnet watch run
 - Přesouvání úkolů mezi seznamy
 - Dynamické rozhraní s [Blazor Bootstrap](https://demos.blazorbootstrap.com/buttons)
 
-## Use-case diagram TODO: dodat obrázek
-```plaintext
-      +----------------+
-      |    Uživatel    |
-      +----------------+
-              |
-      +-----------------+
-      | Správa úkolů    |
-      | - Přidat        |
-      | - Upravit       |
-      | - Smazat        |
-      | - Přesunout     |
-      +-----------------+
-              |
-      +---------------------+
-      | Seznamy úkolů       |
-      | (ToDo, InProgress,  |
-      |  Done, ...)         |
-      +---------------------+
-```
+---
+
 ## Struktura projektu
 
 ```plaintext
 /BlazorDemo
-│── /Components
-│   ├── /Layout
+│── /Components       # UI komponenty a stránky aplikace
+│   ├── /Layout       # Rozvržení aplikace
 │   │   ├── MainLayout.razor
 │   │   ├── NavMenu.razor
-│── /Pages
-│   │   ├── Home.razor # Hlavní stránka
-│   │   ├── Todo.razor # Stránka která zobrazuje Todo aplikaci
-│── /Shared
-│   │   ├── TaskItem.razor # Komponenta pro jednotlivý úkol
-│   │   ├── TaskList.razor # Komponenta pro seznam úkolů
-│   │   ├── AddTaskForm.razor # Komponenta pro přidání úkolu
+│   ├── /Pages        # Stránky aplikace
+│   │   ├── Home.razor        # Hlavní stránka
+│   │   ├── Todo.razor        # Stránka s Todo aplikací
+│   ├── /Shared       # Sdílené komponenty
+│   │   ├── TaskItem.razor        # Komponenta pro jednotlivý úkol
+│   │   ├── TaskList.razor        # Komponenta pro seznam úkolů
+│   │   ├── AddTaskForm.razor     # Komponenta pro přidání úkolu
 │   │   ├── TaskItemDetails.razor # Sidebar s detaily úkolu
-│   ├── _Imports.razor
-│   ├── App.razor
-│   ├── Routes.razor
-│── /Data
-│   ├── tasks.json # JSON kde se ukládají data
-│── /Models
-│   ├── TaskListModel.cs # Model pro seznam úkolů 
-│   ├── TaskModel.cs # Model pro jednotlivý úkol
-│── /Services
-│   ├── TaskService.cs # Service který řeší všechny funkcionality 
-│── /wwwroot
-│   ├── styles.css         # Vlastní CSS
-│── appsettings.Development.json
-│── appsettings.json
-│── BlazorDemo.csproj # Projektový soubor
-│── Program.cs # Start aplikace
-│── Blazor.sln
+│   ├── _Imports.razor  # Globální importy Razor komponent
+│   ├── App.razor       # Root aplikace
+│   ├── Routes.razor    # Definice routování
+│── /Data              # Ukládání a správa dat
+│   ├── tasks.json     # JSON soubor s uloženými úkoly
+│── /Models            # Datové modely
+│   ├── TaskListModel.cs  # Model pro seznam úkolů 
+│   ├── TaskModel.cs      # Model pro jednotlivý úkol
+│── /Services          # Aplikační logika a služby
+│   ├── TaskService.cs # Správa úkolů (přidávání, mazání, přesouvání)
+│── /wwwroot           # Statické soubory (CSS, obrázky)
+│   ├── styles.css     # Vlastní styly aplikace
+│── appsettings.Development.json  # Nastavení pro vývoj
+│── appsettings.json               # Konfigurace aplikace
+│── BlazorDemo.csproj    # Projektový soubor
+│── Program.cs           # Hlavní vstupní bod aplikace
+│── Blazor.sln           # Solution soubor
+
 ```
 
+---
+
+## Sequence diagram
+
+```mermaid
+sequenceDiagram
+    participant User as Uživatel
+    participant AddTaskForm as AddTaskForm.razor
+    participant TaskList as TaskList.razor
+    participant TaskService as TaskService.cs
+
+    User->>TaskList: Klikne na tlačítko "+ Přidat úkol"
+    TaskList-->>User: Zobrazí AddTaskForm komponentu
+    User->>AddTaskForm: Napíše Task název a klikne na "Přidat úkol"
+    AddTaskForm->>TaskList: await OnTaskAdded.InvokeAsync(newTaskText);
+    TaskList->>TaskService: TaskService.AddTask(taskListModel.Name, newTaskText);
+    TaskService-->>TaskList: Aktualizuje seznam úkolů
+    TaskList-->>User: Zobrazí aktualizovaný seznam úkolů
+```
+
+---
+
 ## Ukázky kódu pro přidání seznamu úkolů
+
 ### Komponenta `AddTaskListForm.razor`
 ```razor
 <div class="add-task-form">
@@ -183,6 +193,22 @@ dotnet watch run
         }
     }
 ```
+---
 
-# Úkol první:
+# Cvičení 1: Jednoduchý poznámkový blok
+
+### Zadání
+Vytvoř novou Blazor stránku, která umožní uživateli:
+1. **Přidat** novou poznámku.
+2. **Smazat** existující poznámku.
+3. **Upravit** existující poznámku.
+
+
+<details>
+  <summary>💡 Nápověda</summary>
+
+- Použij **`@bind`** k obousměrnému svázání vstupu.
+- Ulož poznámky do **`List<string>`** a vykresli je pomocí **`@foreach`**.
+
+</details>
 
