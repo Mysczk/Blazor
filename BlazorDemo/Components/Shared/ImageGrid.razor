@@ -1,15 +1,28 @@
 @inject ImageService ImageService
-
 @code {
     private List<string> images = new List<string>();
     private int selectedIndex = -1;
     private ElementReference overlayElement;
+    private string? path;
 
+
+    // Method used to load images from given path
+    // Incomplete: No way to give new path
+    // Future: Path.Combine
     protected override async Task OnInitializedAsync()
     {
-        images = await ImageService.GetImagePathsAsync();
+        // Default path to images
+        if (path == null)
+        {
+            images = await ImageService.GetImagePathsAsync("wwwroot/images/gallery");
+        }
+        else 
+        { 
+            images = await ImageService.GetImagePathsAsync(path);
+        }
     }
 
+    // Method that opens image to preview overlay
     private async Task OpenImage(int index)
     {
         selectedIndex = index;
@@ -17,6 +30,7 @@
         await FocusOverlay();
     }
 
+    // Method that focuses overlay for key control
     private async Task FocusOverlay()
     {
         if (selectedIndex != -1)
@@ -25,11 +39,13 @@
             await overlayElement.FocusAsync();
         }
     }
+
+    // Method closing image overlay
     private void CloseImage()
     {
         selectedIndex = -1;
     }
-
+    // Method giving previous image in overlay
     private void PreviousImage()
     {
         if (selectedIndex > 0)
@@ -44,6 +60,7 @@
         }
     }
 
+    // Method giving next image in overlay
     private void NextImage()
     {
         if (selectedIndex < images.Count - 1)
@@ -58,6 +75,7 @@
         }
     }
 
+    // Method handling keyboard inputs
     private async Task HandleKeyDown(KeyboardEventArgs e)
     {
         if (selectedIndex != -1)
@@ -85,46 +103,77 @@
 }
 else
 {
+    <!-- Gallery structure --> 
     <div class="gallery">
-        @foreach (var img in images.Select((path, index) => new { path, index }))
+        @foreach (var img in images.Select((path, index) => new { path, index })) // LINQ query for image path and its index
         {
-            <img src="@img.path" @onclick="() => OpenImage(img.index)" />
+            <div class="gallery-item">
+                <img src="@img.path" @onclick="() => OpenImage(img.index)" /> <!-- Creation of individual image and assigning open method -->
+            </div>
         }
     </div>
 }
-
+<!-- Overlay structure -->
 @if (selectedIndex != -1)
 {
-    <div class="overlay" tabindex="0" @onkeydown="HandleKeyDown" @ref="overlayElement">
-        <button class="nav-btn left" @onclick="PreviousImage">&#9665;</button>
+    <div class="gal-overlay" tabindex="0" @onkeydown="HandleKeyDown" @ref="overlayElement">
+        <button class="gal-nav-btn left" @onclick="PreviousImage">&#9665;</button>
 
         <img src="@images[selectedIndex]" @onclick="CloseImage" />
 
-        <button class="nav-btn right" @onclick="NextImage">&#9655;</button>
+        <button class="gal-nav-btn right" @onclick="NextImage">&#9655;</button>
     </div>
 }
 
+<!-- Styles -->
 <style>
     .gallery {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-        gap: 10px;
-        padding: 10px;
+        column-count: 5;
+        column-gap: 1rem;
+        padding: 1rem;
+    }
+    @@media (max-width: 1200px) {
+        .gallery {
+            column-count: 4;
+        }
+    }
+
+    @@media (max-width: 992px) {
+        .gallery {
+            column-count: 3;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .gallery {
+            column-count: 2;
+        }
+    
+}
+
+    .gallery-item {
+        break-inside: avoid;
+        margin-bottom: 1rem;
+        background-color: #f8f8f8;
+        border-radius: 0.5rem;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .gallery-item img {
+        width: 100%;
+        display: block;
     }
 
     .gallery img {
-        width: 100%;
-        height: auto;
-        cursor: pointer;
-        border-radius: 5px;
-        transition: transform 0.2s ease-in-out;
+        transition: transform 0.2s;
     }
 
     .gallery img:hover {
         transform: scale(1.05);
     }
 
-    .overlay {
+    .gal-overlay {
         position: fixed;
         top: 0;
         left: 0;
@@ -136,14 +185,13 @@ else
         justify-content: center;
     }
 
-    .overlay img {
+    .gal-overlay img {
         max-width: 80%;
         max-height: 80%;
         border-radius: 10px;
     }
 
-    /* Styl pro navigační tlačítka */
-    .nav-btn {
+    .gal-nav-btn {
         position: absolute;
         top: 50%;
         transform: translateY(-50%);
@@ -155,16 +203,11 @@ else
         border-radius: 50%;
     }
 
-    .nav-btn.left {
+    .gal-nav-btn.left {
         left: 20px;
     }
 
-    .nav-btn.right {
+    .gal-nav-btn.right {
         right: 20px;
-    }
-
-    .nav-btn:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
     }
 </style>

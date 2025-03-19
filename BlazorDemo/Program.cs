@@ -16,11 +16,8 @@ builder.Services.AddRazorComponents()
 var mongoConnectionString = builder.Configuration.GetConnectionString("MongoDb");
 builder.Services.AddSingleton<IMongoClient, MongoClient>(sp => new MongoClient(mongoConnectionString));
 
-
-// Registering ImageService
-builder.Services.AddSingleton(new ImageService("wwwroot/images/gallery"));
-
-
+// Register of ImageService
+builder.Services.AddSingleton<ImageService>();
 // Register MongoDbService
 builder.Services.AddSingleton<MongoDbService>();
 // Registrace služby jako singleton

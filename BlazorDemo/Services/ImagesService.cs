@@ -1,23 +1,13 @@
-using System.Collections.Generic;
-using System.IO;
-using System.Threading.Tasks;
-
 public class ImageService
 {
-    private readonly string _imageFolderPath;
-
-    public ImageService(string imageFolderPath)
-    {
-        _imageFolderPath = imageFolderPath;
-    }
-
-    public Task<List<string>> GetImagePathsAsync()
+    // Method for finding images in given folder
+    public Task<List<string>> GetImagePathsAsync(string path)
     {
         var images = new List<string>();
 
-        if (Directory.Exists(_imageFolderPath))
+        if (Directory.Exists(path))
         {
-            var files = Directory.GetFiles(_imageFolderPath, "*.jpg");
+            var files = Directory.GetFiles(path, "*.jpg"); // Filtering .jpg Optimization: more formats
             foreach (var file in files)
             {
                 images.Add($"images/gallery/{Path.GetFileName(file)}");
