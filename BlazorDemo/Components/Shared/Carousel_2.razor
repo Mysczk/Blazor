@@ -1,16 +1,27 @@
-@code {
-    private int activeIndex = 0;
-    private List<string> images = new()
-{
-"images/gallery/image1.jpg",
-"images/gallery/image2.jpg",
-"images/gallery/image3.jpg"
-};
+@using Microsoft.AspNetCore.Hosting;
+@using Microsoft.Extensions.Hosting;
 
+@inject IWebHostEnvironment env
+
+@code {
+
+    [Parameter]
+    public string WorkFolder { get; set; } = "images/gallery";
+
+    private int activeIndex = 0;
+    private List<string> images = new List<string>();
     private System.Timers.Timer? timer;
 
     protected override void OnInitialized()
     {
+        string fullPath = Path.Combine(env.WebRootPath, WorkFolder.Replace("/", Path.DirectorySeparatorChar.ToString()));
+        if (Directory.Exists(fullPath))
+        {
+            images = Directory.GetFiles(fullPath, "*.jpg").ToList();
+            // Optional: Convert to relative URL paths
+            images = images.Select(img => Path.Combine("/", WorkFolder, Path.GetFileName(img))).ToList();
+        }
+        
         timer = new System.Timers.Timer(3000); // Každé 3 sekundy
         timer.Elapsed += (sender, e) => InvokeAsync(Next);
         timer.AutoReset = true;
