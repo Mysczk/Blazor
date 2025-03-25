@@ -3,23 +3,11 @@
     private List<string> images = new List<string>();
     private int selectedIndex = -1;
     private ElementReference overlayElement;
-    private string? path;
+    private string path = "wwwroot/images/gallery";
 
-
-    // Method used to load images from given path
-    // Incomplete: No way to give new path
-    // Future: Path.Combine
     protected override async Task OnInitializedAsync()
     {
-        // Default path to images
-        if (path == null)
-        {
-            images = await ImageService.GetImagePathsAsync("wwwroot/images/gallery");
-        }
-        else 
-        { 
-            images = await ImageService.GetImagePathsAsync(path);
-        }
+        images = await ImageService.GetImagePathsAsync(path);
     }
 
     // Method that opens image to preview overlay
