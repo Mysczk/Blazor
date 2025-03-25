@@ -706,3 +706,166 @@ Vytvoř Blazor stránku, která umožní:
     ```
     - To nám připojí instanci naší `Service` s naší komponentou 
 </details>
+
+# Úkol: Automatický obrázkový karusel v Blazoru
+
+## Zadání
+
+Vytvořte komponentu v Blazoru, která automaticky zobrazuje obrázky z dané složky jako karusel. Obrázky se mají měnit každé 3 sekundy, přičemž uživatel má možnost přecházet na předchozí nebo následující obrázek pomocí tlačítek.
+
+---
+
+## Kód komponenty a jeho vysvětlení
+
+### 1. Importy a prostředí
+
+```razor
+@using Microsoft.AspNetCore.Hosting
+@using Microsoft.Extensions.Hosting
+
+@inject IWebHostEnvironment env
+```
+
+Zde importujeme knihovny potřebné pro přístup k prostředí aplikace. `@inject` nám umožňuje získat přístup k webovému kořeni projektu (`wwwroot`), abychom mohli načítat soubory.
+
+---
+
+### 2. Parametry a proměnné
+
+```razor
+[Parameter]
+public string WorkFolder { get; set; } = "images/gallery";
+
+private int activeIndex = 0;
+private List<string> images = new List<string>();
+private System.Timers.Timer? timer;
+```
+
+- `WorkFolder` – cesta ke složce s obrázky (relativní vůči `wwwroot`).
+- `activeIndex` – index aktuálního obrázku.
+- `images` – seznam obrázků (cesty k nim).
+- `timer` – časovač pro automatické přepínání obrázků.
+
+---
+
+### 3. Inicializace komponenty
+
+```razor
+protected override void OnInitialized()
+{
+    string fullPath = Path.Combine(env.WebRootPath, WorkFolder.Replace("/", Path.DirectorySeparatorChar.ToString()));
+    if (Directory.Exists(fullPath))
+    {
+        images = Directory.GetFiles(fullPath, "*.jpg").ToList();
+        images = images.Select(img => Path.Combine("/", WorkFolder, Path.GetFileName(img))).ToList();
+    }
+
+    timer = new System.Timers.Timer(3000); // každé 3 sekundy
+    timer.Elapsed += (sender, e) => InvokeAsync(Next);
+    timer.AutoReset = true;
+    timer.Start();
+}
+```
+
+- Spojuje cestu ke složce `WorkFolder` s kořenem webu.
+- Načítá všechny `.jpg` soubory a převádí je na relativní cesty.
+- Spouští časovač, který každé 3 sekundy vyvolá funkci `Next()`.
+
+---
+
+### 4. Funkce pro změnu obrázku
+
+```razor
+private void Next()
+{
+    activeIndex = (activeIndex + 1) % images.Count;
+    timer?.Stop();
+    timer?.Start();
+    StateHasChanged(); // aktualizace UI
+}
+
+private void Previous()
+{
+    activeIndex = (activeIndex - 1 + images.Count) % images.Count;
+    timer?.Stop();
+    timer?.Start();
+    StateHasChanged();
+}
+```
+
+- `Next()` – přepne na další obrázek.
+- `Previous()` – přepne na předchozí obrázek.
+- `StateHasChanged()` – způsobí překreslení UI komponenty.
+
+---
+
+### 5. Uvolnění prostředků
+
+```razor
+public void Dispose()
+{
+    timer?.Dispose();
+}
+```
+
+Při odstranění komponenty se časovač zruší, aby nedošlo k únikům paměti.
+
+---
+
+### 6. HTML šablona komponenty
+
+```razor
+<div class="carousel">
+    <button class="prev" @onclick="Previous">❮</button>
+    <img src="@images[activeIndex]" class="carousel-image" />
+    <button class="next" @onclick="Next">❯</button>
+</div>
+```
+
+HTML struktura komponenty: tlačítka pro navigaci a obrázek podle aktuálního indexu.
+
+---
+
+### 7. Stylování karuselu
+
+```razor
+<style>
+    .carousel {
+        position: relative;
+        width: 800px;
+        height: 400px;
+        margin: auto;
+    }
+
+    .carousel-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 10px;
+    }
+
+    .prev,
+    .next {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(0, 0, 0, 0.5);
+        color: white;
+        border: none;
+        padding: 10px;
+        cursor: pointer;
+    }
+
+    .prev {
+        left: 10px;
+    }
+
+    .next {
+        right: 10px;
+    }
+</style>
+```
+
+Styl definuje vzhled karuselu – velikost, zarovnání, vzhled obrázku a tlačítek.
+
+---
