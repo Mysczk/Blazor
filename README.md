@@ -869,3 +869,223 @@ HTML struktura komponenty: tlačítka pro navigaci a obrázek podle aktuálního
 Styl definuje vzhled karuselu – velikost, zarovnání, vzhled obrázku a tlačítek.
 
 ---
+
+# Úkol: Stopky v Blazoru
+
+## Zadání
+
+Vytvořte komponentu stopek v Blazoru, která bude umožňovat spouštění, zastavení, resetování a zaznamenávání mezičasů (lapů). Komponenta má zobrazovat uplynulý čas a seznam uložených lapů. Má obsahovat tlačítka pro ovládání a být stylovaná jako jednoduchá UI aplikace.
+
+---
+
+## Kód komponenty a jeho vysvětlení
+
+### 1. Hlavička a rozhraní
+
+```razor
+@page "/stopwatch"
+@implements IDisposable
+```
+
+- `@page` definuje URL adresu, kde je komponenta dostupná.
+- `IDisposable` se používá pro správné uvolnění zdrojů (časovače).
+
+---
+
+### 2. C# část – logika stopek
+
+```razor
+@code {
+    private bool isRunning = false;
+    private TimeSpan elapsed = TimeSpan.Zero;
+    private System.Timers.Timer timer;
+    private DateTime startTime;
+    private List<string> laps = new();
+
+    private string formattedTime => elapsed.ToString(@"hh\:mm\:ss\.ff");
+```
+
+- `isRunning` sleduje, zda jsou stopky spuštěné.
+- `elapsed` ukládá celkový uplynulý čas.
+- `timer` je časovač, který aktualizuje čas.
+- `laps` je seznam zaznamenaných mezičasů.
+
+---
+
+### 3. Inicializace a spuštění
+
+```razor
+protected override void OnInitialized()
+{
+    timer = new System.Timers.Timer(100);
+    timer.Elapsed += OnTimerElapsed;
+}
+```
+
+- Časovač je nastaven na interval 100 ms.
+- Každý tik volá metodu `OnTimerElapsed()`.
+
+---
+
+### 4. Spouštění a zastavení stopek
+
+```razor
+private void ToggleTimer()
+{
+    if (isRunning)
+    {
+        timer.Stop();
+        elapsed += DateTime.Now - startTime;
+    }
+    else
+    {
+        startTime = DateTime.Now;
+        timer.Start();
+    }
+    isRunning = !isRunning;
+}
+```
+
+- Spustí nebo zastaví stopky a upraví uplynulý čas.
+
+---
+
+### 5. Průběžná aktualizace času
+
+```razor
+private void OnTimerElapsed(object? sender, System.Timers.ElapsedEventArgs e)
+{
+    var current = DateTime.Now - startTime + elapsed;
+    InvokeAsync(() =>
+    {
+        elapsed = current;
+        StateHasChanged();
+    });
+}
+```
+
+- Přepočítává čas a aktualizuje UI.
+
+---
+
+### 6. Reset a lapy
+
+```razor
+private void Reset() { ... }
+private void AddLap() { ... }
+private void RemoveLap(string lap) { ... }
+private void ClearLaps() { ... }
+```
+
+- `Reset()` – vynuluje stopky.
+- `AddLap()` – uloží aktuální čas do seznamu.
+- `RemoveLap()` – smaže záznam.
+- `ClearLaps()` – vyčistí všechny lapy.
+
+---
+
+### 7. Uvolnění časovače
+
+```razor
+public void Dispose()
+{
+    timer?.Dispose();
+}
+```
+
+- Zabrání úniku paměti.
+
+---
+
+### 8. HTML šablona
+
+```razor
+<div class="stopwatch">
+    <p>Time: @formattedTime</p>
+    <button @onclick="ToggleTimer">@(isRunning ? "⏸ Pause" : "▶ Start")</button>
+    <button @onclick="Reset">⏹ Reset</button>
+    <button @onclick="AddLap" disabled="@(!isRunning)">📍 Add Lap</button>
+    <button @onclick="ClearLaps">Clear Laps</button>
+
+    @if (laps.Count > 0)
+    {
+        <h4>Laps:</h4>
+        <ul>
+            @foreach (var lap in laps)
+            {
+                <li>
+                    @lap
+                    <button @onclick="() => RemoveLap(lap)">🗑</button>
+                </li>
+            }
+        </ul>
+    }
+</div>
+```
+
+- UI pro zobrazení času, ovládání a seznam lapů.
+
+---
+
+### 9. CSS stylování
+
+```css
+<style>
+    .stopwatch {
+        max-width: 500px;
+        margin: 20px auto;
+        padding: 20px;
+        background: #f5f5f5;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        font-family: Arial, sans-serif;
+    }
+
+    .stopwatch p {
+        font-size: 2em;
+        text-align: center;
+        margin: 10px 0;
+    }
+
+    .stopwatch button {
+        margin: 5px;
+        padding: 8px 12px;
+        font-size: 1em;
+        border: none;
+        border-radius: 5px;
+        background-color: #007bff;
+        color: white;
+        cursor: pointer;
+    }
+
+    .stopwatch button:disabled {
+        background-color: #aaa;
+        cursor: not-allowed;
+    }
+
+    .stopwatch ul {
+        list-style-type: none;
+        padding: 0;
+    }
+
+    .stopwatch li {
+        margin: 5px 0;
+        padding: 5px;
+        background-color: #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-radius: 5px;
+    }
+
+    .stopwatch li button {
+        background-color: #dc3545;
+        padding: 4px 8px;
+        font-size: 0.9em;
+    }
+</style>
+```
+
+Stylované rozhraní pro hezké a přehledné stopky.
+
+---
