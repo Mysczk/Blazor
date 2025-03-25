@@ -21,7 +21,7 @@
             // Optional: Convert to relative URL paths
             images = images.Select(img => Path.Combine("/", WorkFolder, Path.GetFileName(img))).ToList();
         }
-        
+
         timer = new System.Timers.Timer(3000); // Každé 3 sekundy
         timer.Elapsed += (sender, e) => InvokeAsync(Next);
         timer.AutoReset = true;
@@ -31,12 +31,18 @@
     private void Next()
     {
         activeIndex = (activeIndex + 1) % images.Count;
+        // Reset timer
+        timer?.Stop();
+        timer?.Start();
         StateHasChanged(); // Aktualizuje UI
     }
 
     private void Previous()
     {
         activeIndex = (activeIndex - 1 + images.Count) % images.Count;
+        // Reset timer-
+        timer?.Stop();
+        timer?.Start();
         StateHasChanged();
     }
 
