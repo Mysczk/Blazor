@@ -1,11 +1,11 @@
 @page "/notepad"
-<PageTitle>Poznámkový blok</PageTitle>
-<h3>Poznámkový blok</h3>
+<PageTitle>Notepad</PageTitle>
+<h3>Notepad</h3>
 
 <div class="mb-3">
-    <TextAreaInput @bind-Value="newNoteText" Rows="3" MaxLength="350" Placeholder="Zadejte poznámku..."/>
+    <TextAreaInput @bind-Value="newNoteText" Rows="3" MaxLength="350" Placeholder="Add a note..."/>
+    <Button @onclick="AddNote" Color="ButtonColor.Primary" class="mt-2">Add</Button>
 </div>
-    <Button @onclick="AddNote" Color="ButtonColor.Primary" class="mt-2">Přidat</Button>
 
 <div class="mb-3"></div>
 <ul class="list-group">
@@ -15,7 +15,7 @@
             @if (note.IsEditing)
             {
                 <TextInput @bind-Value="note.Text" class="form-control me-2" />
-                <Button @onclick="() => SaveEdit(note)" Color="ButtonColor.Success" class="me-2">Uložit</Button>
+                <Button @onclick="() => SaveEdit(note)" Color="ButtonColor.Success" class="me-2">Save</Button>
             }
             else
             {
@@ -33,11 +33,11 @@
 
 <style>
     .note-text {
-    max-height: 100px; 
-    overflow: auto;
-    white-space: pre-wrap;
-    word-wrap: break-word;
-}
+        max-height: 100px; 
+        overflow: auto;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
 </style>
 
 @code {
@@ -73,5 +73,4 @@
         public string Text { get; set; } = "";
         public bool IsEditing { get; set; } = false;
     }
-
 }

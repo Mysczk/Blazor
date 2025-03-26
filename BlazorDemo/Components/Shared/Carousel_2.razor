@@ -3,6 +3,12 @@
 
 @inject IWebHostEnvironment env
 
+<div class="carousel">
+    <button class="prev" @onclick="Previous">❮</button>
+    <img src="@images[activeIndex]" class="carousel-image" />
+    <button class="next" @onclick="Next">❯</button>
+</div>
+
 @code {
 
     [Parameter]
@@ -51,12 +57,6 @@
         timer?.Dispose();
     }
 }
-
-<div class="carousel">
-    <button class="prev" @onclick="Previous">❮</button>
-    <img src="@images[activeIndex]" class="carousel-image" />
-    <button class="next" @onclick="Next">❯</button>
-</div>
 
 <style>
     .carousel {
